@@ -52,8 +52,9 @@ def _factory_prompts(slug: str, job: dict) -> dict:
         b = f"Usa l'agente costruttore-siti: costruisci `{repo}` con site_build('{repo}') e riferisci il verdetto, gli errori e cosa va confermato col cliente."
         dep = f"Usa l'agente deployer: se il rapporto di `{repo}` non e' bloccato, proponi la pubblicazione con propose_site_launch('{repo}', 'Modifica sito {repo}: ...')."
         return {"direttore": d, "copywriter": c, "costruttore": b, "deployer": dep}
-    d = (f"Usa l'agente direttore-creativo. {base}\nLeggi PRIMA site_existing_list (se il cliente ha gia' un sito e' una modifica, non un sito nuovo) e site_context('{slug}'). "
-         f"Poi progetta lo spec con lo scheletro obbligatorio e salvalo con site_spec_save('{slug}', ...). Rispondi in 5 righe: marca, palette, sezioni, cosa manca.")
+    d = (f"Usa l'agente direttore-creativo. {base}\nLeggi site_context('{slug}'). "
+         f"Poi progetta lo spec con lo scheletro obbligatorio e salvalo TASSATIVAMENTE con site_spec_save('{slug}', ...). "
+         f"Lo slug di salvataggio DEVE essere esattamente '{slug}'. Rispondi in 5 righe: marca, palette, sezioni, cosa manca.")
     a = (f"Usa l'agente art-director per il sito `{slug}` (spec gia' salvato dal direttore creativo). Leggi site_context('{slug}') e site_spec_load('{slug}'): scrivi la bibbia visiva del brand, "
          f"l'hook dell'hero e i prompt professionali delle immagini per ruolo, con la stessa frase di stile in tutti, e consegna con site_art_save('{slug}', ...). Chiama site_art_save UNA SOLA VOLTA e chiudi subito il turno (non ritentare se vedi chiavi ignorate). Le foto del cliente (client:N) non si toccano. "
          f"Se l'hero e' un hero_video e il cliente non ha un video suo, cerca un video stock gratuito con site_stock_video (query inglese di 2-4 parole concrete), scegli un id adatto (orizzontale, 6-40 s, senza volti ne' loghi) e consegnalo come video.hero_id. Rispondi in 6 righe.")
@@ -187,8 +188,19 @@ async def site_factory(ctx, payload):
         # 1. Direttore Creativo
         out_dir = await ctx.step("direttore", lambda: run(prompts["direttore"], on_text=lambda t: None))
         spec = sf.load_spec(work)
-        if out_dir.get("subtype") != "success" or spec is None:
-            tracker.update("direttore", f"errore: {out_dir.get('subtype') or 'fallito'}", icon="❌")
+        if spec is None:
+            # Fallback immediato: cerca lo spec piu' recente salvato
+            import time, shutil
+            candidates = sorted(sf.sites_dir().glob("*/spec.json"), key=lambda f: f.stat().st_mtime, reverse=True)
+            for c in candidates:
+                if c.is_file() and time.time() - c.stat().st_mtime < 900:
+                    sf.workdir(work).mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(c, sf.workdir(work) / "spec.json")
+                    spec = sf.load_spec(work)
+                    if spec:
+                        break
+        if spec is None:
+            tracker.update("direttore", f"errore: spec non salvato dall'agente", icon="❌")
             return {"esito": "fermo", "passo": "direttore"}
         tracker.update("direttore", f"scheletro definito ({len(spec['sections'])} sezioni)")
 

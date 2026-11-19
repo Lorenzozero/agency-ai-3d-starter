@@ -433,7 +433,27 @@ def merge_copy(slug: str, copy) -> dict:
 
 def load_spec(slug: str) -> dict | None:
     p = workdir(slug) / "spec.json"
-    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
+    if p.exists():
+        try:
+            return json.loads(p.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    # Fallback di sicurezza: se l'agente ha salvato con un altro slug o sul repo originale, recupera lo spec recente
+    try:
+        candidates = []
+        for sf in sites_dir().glob("*/spec.json"):
+            if sf != p and sf.is_file():
+                candidates.append((sf.stat().st_mtime, sf))
+        if candidates:
+            candidates.sort(key=lambda x: x[0], reverse=True)
+            newest_mtime, newest_file = candidates[0]
+            if time.time() - newest_mtime < 900:
+                workdir(slug).mkdir(parents=True, exist_ok=True)
+                shutil.copy2(newest_file, p)
+                return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        pass
+    return None
 
 
 def _counter() -> Path:

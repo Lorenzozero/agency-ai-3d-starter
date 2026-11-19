@@ -81,6 +81,65 @@ export default function OfficeView() {
     return () => clearInterval(id)
   }, [])
 
+  // Movimenti autonomi ambientali ("Ufficio Vivo")
+  // A rotazione continua ogni 4-6s uno o due agenti liberi si alzano,
+  // vanno al bancone del caffè, in sala riunioni o a consultare un collega
+  const [ambientSpots, setAmbientSpots] = useState({})
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const nowMs = Date.now()
+      setAmbientSpots(prev => {
+        const next = { ...prev }
+        for (const [id, s] of Object.entries(next)) {
+          if (nowMs >= s.until) delete next[id]
+        }
+        const wandering = Object.keys(next).length
+        if (wandering < 2 && errandQueue.current.length === 0 && agents.length > 0) {
+          const availAgents = agents.filter(a =>
+            a.active &&
+            !next[a.id] &&
+            (!errand || errand.who !== `a:${a.id}`) &&
+            !tasks.some(t => t.asignado === a.id && t.estado === 'en_progreso')
+          )
+          if (availAgents.length > 0) {
+            const chosen = availAgents[Math.floor(Math.random() * availAgents.length)]
+            const rand = Math.random()
+            let spot
+            if (rand < 0.4) {
+              spot = {
+                place: { type: 'kitchen', index: Math.floor(Math.random() * 3) },
+                activity: 'drink',
+                until: nowMs + 9000 + Math.random() * 5000,
+                label: 'caffè'
+              }
+            } else if (rand < 0.7) {
+              spot = {
+                place: { type: 'meeting', index: Math.floor(Math.random() * 12) },
+                activity: 'idle',
+                until: nowMs + 10000 + Math.random() * 6000,
+                label: 'in sala'
+              }
+            } else {
+              const others = agents.filter(o => o.id !== chosen.id && o.active)
+              if (others.length > 0) {
+                const target = others[Math.floor(Math.random() * others.length)]
+                spot = {
+                  place: { type: 'visit', targetId: `a:${target.id}` },
+                  activity: 'carry',
+                  until: nowMs + 8000 + Math.random() * 4000,
+                  label: `con ${target.name}`
+                }
+              }
+            }
+            if (spot) next[chosen.id] = spot
+          }
+        }
+        return next
+      })
+    }, 4000)
+    return () => clearInterval(timer)
+  }, [agents, tasks, errand])
+
   // ===== Estado de cada personaje =====
   const characters = useMemo(() => {
     const list = []
@@ -133,11 +192,18 @@ export default function OfficeView() {
         if (inMeeting) {
           place = { type: 'meeting', index: meetN++ }
         }
-        const activity = working
+        let activity = working
           ? 'typing'
           : inMeeting
             ? (meetN % 2 === 0 ? 'typing' : 'idle')
             : (ACTIVITY[status] || 'idle')
+
+        // Movimento autonomo ("Ufficio Vivo") se l'agente è libero e attivo
+        const amb = ambientSpots[a.id]
+        if (amb && !working && !inMeeting && !onBreak && a.active) {
+          place = amb.place
+          activity = amb.activity
+        }
 
         list.push({
           id: `a:${a.id}`, kind: 'agente', ref: a, name: a.name, fullName: a.name,
@@ -146,7 +212,7 @@ export default function OfficeView() {
         })
       })
     return list
-  }, [users, agents, tasks, now, briefing])
+  }, [users, agents, tasks, now, briefing, ambientSpots])
 
   const byId = useMemo(() => Object.fromEntries(characters.map(c => [c.id, c])), [characters])
   const engineOn = !!engine?.online && now - (engine?.lastSeen?.toMillis?.() || 0) < 3 * 60000
@@ -174,11 +240,11 @@ export default function OfficeView() {
     for (const t of tasks) {
       const before = prev.get(t.id)
       const who = 'a:' + t.asignado
-      if (!before && isAgent(t.asignado) && who !== coordId && /^coordinador/i.test(t.creadoPor || '')) {
-        enqueue([{ who: coordId, to: who, label: 'consegna un task' }])
+      if ((!before || before.estado !== 'en_progreso') && t.estado === 'en_progreso' && isAgent(t.asignado) && who !== coordId) {
+        enqueue([{ who: coordId, to: who, label: 'consegna task' }])
       }
-      if (before && before.estado !== 'en_espera' && t.estado === 'en_espera' && t.agentStatus === 'done' && isAgent(t.asignado)) {
-        const steps = who !== coordId ? [{ who, to: coordId, label: 'consegna al coordinatore' }] : []
+      if (before && before.estado !== t.estado && (t.estado === 'en_espera' || t.estado === 'completada') && isAgent(t.asignado)) {
+        const steps = who !== coordId ? [{ who, to: coordId, label: 'consegna report' }] : []
         enqueue(steps)
       }
     }
@@ -220,14 +286,16 @@ export default function OfficeView() {
   useEffect(() => {
     sceneRef.current?.setCharacters(characters.map(c => {
       const busy = errand?.who === c.id && byId[errand.to]
+      const amb = ambientSpots[c.ref?.id]
+      const labelExtra = busy ? ' · ' + errand.label : (amb ? ' · ' + amb.label : '')
       return {
-        id: c.id, name: busy ? c.name + ' · ' + errand.label : c.name, look: c.look,
+        id: c.id, name: labelExtra ? c.name + labelExtra : c.name, look: c.look,
         place: busy ? { type: 'visit', targetId: errand.to } : c.place,
         activity: busy ? 'carry' : c.activity,
         statusColor: STATUS[c.status].color,
       }
     }))
-  }, [characters, errand, byId])
+  }, [characters, errand, byId, ambientSpots])
 
   // Il lancio: quando un deploy va a buon fine (scheda di modifica completata, con il link dell'anteprima o della PR) un missile parte dal tetto
   // dell'ufficio dell'agente che l'ha fatto. Al primo caricamento si segna l'esistente in silenzio: partono solo i lanci nuovi.
@@ -302,8 +370,8 @@ export default function OfficeView() {
   const employees = characters.filter(c => c.kind === 'empleado' && c.ref.uid !== user?.uid)
   const activeAgents = characters.filter(c => c.kind === 'agente' && c.ref.active)
   const reserveAgents = characters.filter(c => c.kind === 'agente' && !c.ref.active)
-  const onlineCount = characters.filter(c => c.kind === 'empleado' && c.status !== 'desconectado').length
-  const workingCount = characters.filter(c => c.status === 'trabajando').length
+  const onlineCount = characters.filter(c => c.status !== 'desconectado' && c.status !== 'reserva').length
+  const workingCount = characters.filter(c => c.status === 'trabajando' || c.activity === 'typing').length
   const hovered = hover ? byId[hover.id] : null
 
   return (

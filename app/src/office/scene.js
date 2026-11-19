@@ -491,12 +491,27 @@ function buildOffice(scene, nav, nav1) {
   b.plant(8.2, -3.9, 1.2)
   b.plant(8.2, 3.9, 1.2)
 
-  // Area Tech & Lounge a est (ex vano ascensore)
+  // Area Tech, Caffè & Break a est
   b.floor(10.8, -2.5, 14.4, 2.5, plaza, 0.008)
   b.bookshelf(12.6, -1.8, 0, 2.4)
   b.plant(11.2, 2.0, 1.1)
   b.plant(14.0, 2.0, 1.1)
   b.bench(12.6, 1.8, 0, 3)
+
+  // Mobile bar caffè espresso con posti per pausa caffè
+  b.box(0.65, 0.85, 1.8, M.deskWood, 13.8, 0.42, 0)
+  b.block(13.8, 0, 0.65, 1.8, 0, 0.2)
+  b.box(0.35, 0.42, 0.35, M.dark, 13.8, 0.98, -0.35)
+  b.box(0.1, 0.1, 0.1, M.white, 13.6, 0.89, -0.35)
+  b.plant(13.8, 0.95, 0.5, 0.5)
+  b.sign('Area Caffè', 13.6, 1.35, -1.0, 1.8, { posts: true })
+
+  b.seats.kitchen.push(
+    { x: 12.6, z: -0.35, rot: Math.PI / 2, seat: false, level: 0 },
+    { x: 12.6, z: 0.25, rot: Math.PI / 2, seat: false, level: 0 },
+    { x: 12.2, z: 0.0, rot: Math.PI / 2, seat: false, level: 0 }
+  )
+
   b.lift = new THREE.Group()
 
   // Insegna Giardino
