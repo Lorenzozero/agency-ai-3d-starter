@@ -61,6 +61,8 @@ export default function OfficeView() {
   const containerRef = useRef(null)
   const [noGl, setNoGl] = useState(false)                // il 3D non e' partito (niente WebGL)
   const sceneRef = useRef(null)
+  const errandQueue = useRef([])
+  const [errand, setErrand] = useState(null)            // paso actual { who, to, label }
   const [now, setNow] = useState(Date.now())
   const [hover, setHover] = useState(null)
   const [selectedId, setSelectedId] = useState(null)
@@ -217,11 +219,8 @@ export default function OfficeView() {
   const byId = useMemo(() => Object.fromEntries(characters.map(c => [c.id, c])), [characters])
   const engineOn = !!engine?.online && now - (engine?.lastSeen?.toMillis?.() || 0) < 3 * 60000
 
-  // ===== Entregas visuales: el coordinador reparte y recoge el trabajo =====
-  // Solo animación: al delegar, el coordinador lleva la carpeta al agente; al terminar, l'agente se la lleva
-  // al coordinador y este va a la oficina del dueño. Cada paso espera a que el personaje llegue.
-  const [errand, setErrand] = useState(null)         // paso actual { who, to, label }
-  const errandQueue = useRef([])
+  // ===== Entregas visuales: el coordinador reparte y recoge el lavoro =====
+  // Solo animazione: al delegare, il coordinatore porta la cartella all'agente; al termine, l'agente la porta al coordinatore.
   const prevTasks = useRef(null)
   const coordId = useMemo(() => { const j = agents.find(isCoordinador); return j ? 'a:' + j.id : null }, [agents])
   const ownerId = useMemo(() => { const e = users.find(u => (u.email || '').toLowerCase() === SUPER_ADMIN_EMAIL); return e ? 'u:' + e.uid : null }, [users])
