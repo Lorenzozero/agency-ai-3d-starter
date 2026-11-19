@@ -1795,11 +1795,12 @@ tbody tr:hover { background: var(--bg-2); }
 
 .office-stage {
   position: relative;
+  flex: 1;
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--border);
   background: linear-gradient(160deg, #cfeee9 0%, #e9e4ff 100%);
-  min-height: 0;
+  min-height: 440px;
 }
 [data-theme="dark"] .office-stage { background: linear-gradient(160deg, #1d2a3a 0%, #241a44 100%); }
 .office-canvas { position: absolute; inset: 0; }
