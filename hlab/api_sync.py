@@ -44,7 +44,7 @@ FAMILIES = [("crm", "crm", "CRM", "🗂", "#2563eb"), ("projects", "projects", "
             ("read", "files", "Lettura file", "📖", "#64748b"), ("grep", "files", "Lettura file", "📖", "#64748b"), ("glob", "files", "Lettura file", "📖", "#64748b")]
 GROUP_KEY = {"crm_read": "crm", "projects_read": "projects", "pricing": "pric", "graph_read": "graph", "ops_read": "ops", "proposals": "prop",
              "drafts": "draft", "learning": "learn", "powers": "pow"}
-ACTIVE_S = 30                                                       # un agente e' "al lavoro" finche' l'ultimo suo evento ha meno di tanti secondi
+ACTIVE_S = 90                                                       # un agente e' "al lavoro" finche' l'ultimo suo evento ha meno di tanti secondi
 LIVE_EVERY_S = 4
 
 
@@ -121,7 +121,33 @@ def live_sync_once(store: Store, ev: Events | None = None, now: float | None = N
     """Allinea le schede "in corso" a cio' che gli agenti stanno facendo ora (poche righe di SQLite: gira ogni pochi secondi)."""
     ev = ev or Events()
     names = {n: n.replace("-", " ").title().replace("Coo", "COO").replace("Crm", "CRM") for n in registry.load_all()}
-    docs = live_docs(ev.active_since(ACTIVE_S, now), names)
+    active = ev.active_since(ACTIVE_S, now)
+    try:
+        from .durable import Durable
+        import json as _json
+        durable = Durable()
+        for job in durable.list("running", limit=5):
+            if job.get("kind") == "site_factory":
+                payload = _json.loads(job.get("payload") or "{}")
+                slug = payload.get("slug", "sito")
+                factory_team = [
+                    ("coo", "Orchestrazione pipeline fabbrica"),
+                    ("direttore-creativo", "Architettura e layout sezioni"),
+                    ("art-director", "Bibbia visiva e moodboard"),
+                    ("copywriter", "Copywriting persuasivo e testi sezioni"),
+                    ("costruttore-siti", "Assemblaggio e build componenti"),
+                    ("sicurezza", "Audit di sicurezza, CSP e sanitizzazione"),
+                    ("performance", "Controllo Core Web Vitals e rendering"),
+                    ("seo", "Verifica meta tag, OpenGraph e schema.org"),
+                    ("deployer", "Verifica headless e deploy"),
+                    ("sentinella", "Verifica endpoint e monitoraggio uptime"),
+                ]
+                for ag, role_desc in factory_team:
+                    if ag not in active:
+                        active[ag] = {"tool": "sites", "kind": "tool_allow", "desc": f"{role_desc} per «{slug}»", "ts": time.time()}
+    except Exception as e:
+        pass
+    docs = live_docs(active, names)
     for tid, d in docs.items():
         old = store.get(f"tasks/{tid}") or {}
         if any(old.get(k) != v for k, v in d.items()):                 # niente scritture inutili: ogni scrittura sveglia tutti gli ascoltatori
@@ -195,9 +221,12 @@ def sync_once(store: Store, ev: Events | None = None, services: dict | None = No
             store.set(f"agents/{aid}", {**d, "createdAt": {"__op": "serverTimestamp"}}, merge=True)
         elif any(old.get(k) != d.get(k) for k in live_keys):           # altrimenti restano le modifiche fatte dalla GUI (riserva, foto, avatar, nome) ma si aggiornano metriche e strumenti reali
             store.update(f"agents/{aid}", {k: d[k] for k in live_keys if k in d})
+    for doc in store.query("agents"):
+        if doc.get("id") and doc["id"] not in ag:
+            store.delete(f"agents/{doc['id']}")
     svc = service_states() if services is None else services
     store.set("config/agentWorker", {"online": True, "lastSeen": {"__op": "serverTimestamp"}, "host": platform.node(), "services": svc}, merge=True)
-    store.set("users/lorenzo", {"name": "Lorenzo", "email": "admin@agency-ai.local", "role": "admin", "color": "#4700E0", "photo": "",
+    store.set("users/lorenzo", {"name": "Lorenzo", "email": "lorenzo@childhoodfriendship.it", "role": "admin", "color": "#4700E0", "photo": "",
                                 "lastSeen": {"__op": "serverTimestamp"}}, merge=True)
     tasks = task_docs(ev)
     for tid, d in tasks.items():
