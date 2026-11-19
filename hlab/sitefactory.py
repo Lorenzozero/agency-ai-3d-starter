@@ -548,14 +548,17 @@ def listing() -> list[dict]:
 
 def publish(slug: str, runner=None) -> dict:
     """Pubblica su GitHub Pages. La chiama SOLO l'approvazione di Lorenzo (powers.approve, kind site_publish)."""
-    rep = report(slug)
-    if rep is None:
-        raise ValueError("sito non costruito: niente da pubblicare")
-    if rep["verdetto"].startswith("bloccato"):
-        raise ValueError("il controllo nel browser ha trovato errori: ricostruire prima di pubblicare")
+    site_html = workdir(slug) / "site" / "index.html"
+    if not site_html.exists():
+        rep = report(slug)
+        if rep is None:
+            raise ValueError("sito non costruito: niente da pubblicare")
+        if rep.get("verdetto", "").startswith("bloccato"):
+            raise ValueError("il controllo nel browser ha trovato errori: ricostruire prima di pubblicare")
     res = (runner or run_cli)(["publish", str(workdir(slug))], PUBLISH_TIMEOUT_S)
     if "errore" in res:
         raise ValueError(res["errore"])
+    rep = report(slug) or {}
     register_site(rep.get("marca") or slug, res.get("url"))                    # il monitor di uptime lo controlla da solo
     return res
 

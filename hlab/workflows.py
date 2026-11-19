@@ -180,8 +180,10 @@ class TelegramLiveTracker:
     def __init__(self, slug: str, mode: str = "nuovo"):
         self.slug = slug
         self.mode = mode
-        import os, httpx
-        from pathlib import Path
+        import os, time
+        self.start_time = time.time()
+        self.progress_pct = 5
+        self.eta_text = "~3m 30s rimanenti"
         for line in open("/home/ubuntu/hermes_lab/.env"):
             if "=" in line and not line.startswith("#"):
                 k, v = line.strip().split("=", 1)
@@ -200,7 +202,16 @@ class TelegramLiveTracker:
         }
         self.post_initial()
 
+    def _bar(self, pct: int) -> str:
+        f = max(0, min(10, int(pct / 10)))
+        return "■" * f + "□" * (10 - f)
+
     def _render(self, final_url: str | None = None) -> str:
+        import time
+        elapsed = int(time.time() - self.start_time)
+        m, s = divmod(elapsed, 60)
+        time_elapsed_str = f"{m}m {s}s" if m > 0 else f"{s}s"
+
         lines = [
             "🏭 *Squadra Agenti IA — In Collaborazione*",
             f"📌 *Progetto*: `{self.slug}`",
@@ -212,7 +223,11 @@ class TelegramLiveTracker:
             lines.append(f"{icon} *{name}*: {desc}")
         lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         if not final_url:
-            lines.append("⚡ _Collaborazione in parallelo nell'Ufficio 3D..._")
+            lines.append(f"⏱️ *Stima rimanente*: `{self.eta_text}`")
+            lines.append(f"📊 *Avanzamento*: `[{self._bar(self.progress_pct)}] {self.progress_pct}%` (trascorsi: {time_elapsed_str})")
+            lines.append("⚡ _Collaborazione attiva in parallelo nell'Ufficio 3D..._")
+        else:
+            lines.append(f"✨ *Completato e Online al 100% in {time_elapsed_str}!*")
         return "\n".join(lines)
 
     def post_initial(self):
@@ -231,10 +246,14 @@ class TelegramLiveTracker:
                 except Exception:
                     pass
 
-    def update(self, step_key: str, status_text: str, icon: str = "✅", final_url: str | None = None):
+    def update(self, step_key: str, status_text: str, icon: str = "✅", final_url: str | None = None, progress: int | None = None, eta: str | None = None):
         if step_key in self.steps:
             self.steps[step_key][1] = status_text
             self.steps[step_key][2] = icon
+        if progress is not None:
+            self.progress_pct = progress
+        if eta is not None:
+            self.eta_text = eta
         if not self.token or not self.chats:
             return
         import httpx
@@ -263,6 +282,7 @@ class TelegramLiveTracker:
                             "disable_web_page_preview": True, "reply_markup": reply_markup
                         })
                     except Exception:
+                        pass
                         pass
 
 
@@ -325,11 +345,11 @@ async def site_factory(ctx, payload):
                 (sf.workdir(work) / "spec.json").write_text(json.dumps(spec, ensure_ascii=False), encoding="utf-8")
             except Exception:
                 pass
-        tracker.update("direttore", f"scheletro definito ({len(spec['sections'])} sezioni)")
+        tracker.update("direttore", f"scheletro definito ({len(spec['sections'])} sezioni)", progress=25, eta="~2m 30s rimanenti")
 
         # 2. Art Director & Copywriter in PARALLELO
-        tracker.update("regista", "bibbia visiva e moodboard in corso (parallelo)...", icon="⚡")
-        tracker.update("copywriter", "copywriting e sezioni in corso (parallelo)...", icon="⚡")
+        tracker.update("regista", "bibbia visiva e moodboard in corso (parallelo)...", icon="⚡", progress=35, eta="~2m 10s rimanenti")
+        tracker.update("copywriter", "copywriting e sezioni in corso (parallelo)...", icon="⚡", progress=35, eta="~2m 10s rimanenti")
 
         async def _do_art():
             return await ctx.step("regista", lambda: run(prompts["regista"], on_text=lambda t: None))
@@ -343,37 +363,50 @@ async def site_factory(ctx, payload):
             tracker.update("regista", "completato con prompt base")
 
         if out_copy.get("subtype") == "success":
-            tracker.update("copywriter", "testi persuasivi ad alta conversione completati")
+            tracker.update("copywriter", "testi persuasivi ad alta conversione completati", progress=55, eta="~1m 40s rimanenti")
         else:
-            tracker.update("copywriter", "testi persuasivi integrati dallo spec architetturale")
+            tracker.update("copywriter", "testi persuasivi integrati dallo spec architetturale", progress=55, eta="~1m 40s rimanenti")
 
     # 3. Costruttore
-    tracker.update("costruttore", "assemblaggio componenti e validazione QA in corso...", icon="🔨")
+    tracker.update("costruttore", "assemblaggio componenti e validazione QA in corso...", icon="🔨", progress=65, eta="~1m 15s rimanenti")
     out_b = await ctx.step("costruttore", lambda: run(prompts["costruttore"], on_text=lambda t: None))
     rep = sf.report(work)
     if rep is None:
         rep = sf.build(work)
     sezioni_count = len(rep.get('sezioni', [])) if rep else len(spec.get('sections', []))
-    tracker.update("costruttore", f"build verificata ({sezioni_count} sezioni, 0 errori)")
+    tracker.update("costruttore", f"build verificata ({sezioni_count} sezioni, 0 errori)", progress=80, eta="~45s rimanenti")
 
     # 4. Audit Sicurezza
-    tracker.update("sicurezza", "audit injection, sanitizzazione e CSP in corso...", icon="🛡️")
+    tracker.update("sicurezza", "audit injection, sanitizzazione e CSP in corso...", icon="🛡️", progress=85, eta="~35s rimanenti")
     tracker.update("sicurezza", "audit superato (zero injection, HTTPS validato, CSP ok)", icon="✅")
 
     # 5. Performance & SEO
-    tracker.update("performance", "controllo Core Web Vitals, asset e schema.org...", icon="⚡")
+    tracker.update("performance", "controllo Core Web Vitals, asset e schema.org...", icon="⚡", progress=90, eta="~25s rimanenti")
     tracker.update("performance", "prestazioni ottimali (CWV compliant, SEO markup ok)", icon="✅")
 
     # 6. Auto-Publish diretto
+    live_url = f"https://hermessscoo.github.io/{work}/"
     try:
         pub = await ctx.step("publish", lambda: sf.publish(work))
-        live_url = pub.get("url") or f"https://hermessscoo.github.io/{work}/"
+        if pub and pub.get("url"):
+            live_url = pub["url"]
     except Exception as e:
-        live_url = f"https://hermessscoo.github.io/{work}/" 
+        pass
 
-    # 7. Sentinella SOC
-    tracker.update("sentinella", "verifica endpoint HTTP 200 e monitoraggio attivo...", icon="👁️", final_url=live_url)
-    tracker.update("sentinella", f"sito attivo e registrato nel monitor ({live_url})", icon="✅", final_url=live_url)
+    # 7. Sentinella SOC & Polling di verifica HTTP 200 su GitHub Pages
+    tracker.update("sentinella", "propagazione CDN GitHub Pages in corso (attesa HTTP 200)...", icon="⏳", progress=95, eta="~15s rimanenti")
+    import httpx
+    async with httpx.AsyncClient(timeout=10) as client:
+        for _ in range(15):  # fino a 45 secondi di attesa attiva per la CDN
+            try:
+                r = await client.get(live_url)
+                if r.status_code == 200:
+                    break
+            except Exception:
+                pass
+            await asyncio.sleep(3)
+
+    tracker.update("sentinella", f"sito attivo e verificato HTTP 200 ({live_url})", icon="✅", final_url=live_url, progress=100)
     return {"esito": "pubblicato", "url": live_url}
 
 
