@@ -2,21 +2,21 @@
 
 # ⚡ Agency AI 3D
 
-**Squadra di 15 Agenti IA Autonomi · Ufficio 3D Live · Claude Agent SDK · Controllo Umano 1-Click**
+**15 Agenti IA Specializzati · Ufficio 3D Live · Claude Agent SDK · Approvazione Umana 1-Click**
 
-[![Claude Agent SDK](https://img.shields.io/badge/Claude_Agent_SDK-MCP_Native-7c3aed?style=for-the-badge)](https://github.com/anthropics/claude-agent-sdk-python)
-[![Three.js 3D](https://img.shields.io/badge/Three.js-Isometric_3D_Office-22c55e?style=for-the-badge)](app/src/office/scene.js)
-[![Router 0€](https://img.shields.io/badge/LLM_Router-OpenRouter_%7C_Gemini_%7C_NVIDIA_%7C_Groq-38bdf8?style=for-the-badge)](models.yaml)
-[![SQLite SSE](https://img.shields.io/badge/Storage-SQLite_Real--Time_SSE-f59e0b?style=for-the-badge)](hlab/docstore.py)
-[![License MIT](https://img.shields.io/badge/License-MIT-f0f0ff?style=for-the-badge)](app/LICENSE-ederland)
+[![Claude Agent SDK](https://img.shields.io/badge/Motore-Claude_Code_+_Agent_SDK-7c3aed?style=for-the-badge)](https://github.com/anthropics/claude-agent-sdk-python)
+[![Router 0€](https://img.shields.io/badge/Router_0€-OpenRouter_%7C_Gemini_%7C_NVIDIA_%7C_Groq-22c55e?style=for-the-badge)](models.yaml)
+[![Three.js 3D](https://img.shields.io/badge/Console-Three.js_3D_+_React_Mobile-38bdf8?style=for-the-badge)](app/src/office/scene.js)
+[![SQLite SSE](https://img.shields.io/badge/Backend-Starlette_+_SQLite_SSE-f59e0b?style=for-the-badge)](hlab/docstore.py)
+[![License MIT](https://img.shields.io/badge/Licenza-MIT-f0f0ff?style=for-the-badge)](app/LICENSE-ederland)
 
-> **Regola d'oro:** *Gli agenti propongono, tu decidi.* Nessuna scrittura sul CRM, preventivo o deploy parte senza il tuo **Sì**.
+**Un'agenzia completa di agenti IA che gira sulla tua VM Linux, lavora in un ufficio 3D in tempo reale e ti chiede sempre il permesso prima di modificare dati o pubblicare siti.**
 
 </div>
 
 ---
 
-## 🎬 Demo Live
+## 🎬 1. Come Appare in Azione
 
 <div align="center">
   <video src="docs/demo-agency-ai.mp4" controls playsinline muted width="100%" poster="docs/poster-agency-ai.webp">
@@ -26,58 +26,31 @@
 
 ---
 
-## 🧩 Le 5 Viste della Console (Mobile-First)
+## ❓ 2. Cosa Ti Serve e Quanto Costa? (Prima di Scaricarlo)
 
 <table>
   <tr>
     <td width="33%" valign="top">
-      <h4>📊 1. Il Mio Pannello</h4>
+      <h4>🖥️ Dove Gira?</h4>
       <ul>
-        <li>Toggle range su 1 riga (<code>Oggi · Sett · Mese · Sempre</code>)</li>
-        <li>Griglia <b>3×2</b> metriche live</li>
-        <li><b>3 Grafici a Torta SVG</b> (Stato Task, Azioni Squadra, Consumo Token)</li>
+        <li><b>OS:</b> Ubuntu 22.04 / 24.04 o WSL2</li>
+        <li><b>Minimo:</b> 2 vCPU · 4 GB RAM · 20 GB SSD</li>
+        <li><b>Consigliato:</b> 4 vCPU · 8 GB RAM (qualsiasi VPS cloud, Oracle Free Tier o Mini-PC in casa)</li>
       </ul>
     </td>
     <td width="33%" valign="top">
-      <h4>🏢 2. Ufficio 3D</h4>
+      <h4>💸 Quanto Costa in Token?</h4>
       <ul>
-        <li>Piano unico con <b>Sala Riunioni</b> centrale</li>
-        <li>Camera ravvicinata sul <b>cluster più denso</b> di agenti</li>
-        <li>3 soli indicatori: <code>Connessi · Attivi · Al lavoro</code></li>
+        <li><b>Domande & Monitoraggio (0 €):</b> Codice locale (<code>lean.py</code>) + Router su modelli gratuiti (<i>OpenRouter :free, Gemini, Groq, NVIDIA</i>)</li>
+        <li><b>Lavoro con Strumenti MCP:</b> Abbonamento <b>Claude</b> (via <code>claude</code> CLI) oppure API Key con <b>tetto massimo</b> (es. <code>0.35 $/task</code>)</li>
       </ul>
     </td>
     <td width="33%" valign="top">
-      <h4>🗂️ 3. Task (Tavola + Tabella)</h4>
+      <h4>🔒 È Sicuro?</h4>
       <ul>
-        <li><b>Tavola Figma</b> infinita (pan/zoom + Triage 1-click)</li>
-        <li><b>Tabella</b> ordinabile + export CSV</li>
-        <li>Trascina su <i>Completati</i> = <b>Approva ed esegui</b></li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td width="33%" valign="top">
-      <h4>👥 4. Squadra & Token</h4>
-      <ul>
-        <li>Griglia compatta <b>3 card per riga</b></li>
-        <li><b>Barra progressiva Token</b> reali da <code>events.db</code></li>
-        <li>Click sulla card → Missione, Tool MCP, Skills e Timer</li>
-      </ul>
-    </td>
-    <td width="33%" valign="top">
-      <h4>⚙️ 5. Sistema & Router</h4>
-      <ul>
-        <li>Stato live servizi <code>systemd</code> e siti online</li>
-        <li>Quote provider LLM e rotazione modelli <code>:free</code></li>
-        <li>Registro ultimi 40 eventi e coda lavori durabili</li>
-      </ul>
-    </td>
-    <td width="33%" valign="top">
-      <h4>🛡️ 6. Sicurezza & Permessi</h4>
-      <ul>
-        <li>Hook <code>PreToolUse</code> su ogni chiamata MCP</li>
-        <li>Approvazioni monouso salvate su SQLite (<code>events.db</code>)</li>
-        <li>Tetto di spesa per singolo task e giornaliero</li>
+        <li><b>Zero porte aperte:</b> accedi via Tunnel HTTPS (Cloudflare / Tailscale)</li>
+        <li><b>Zero Firebase / Cloud terzi:</b> tutti i dati restano nei tuoi file SQLite locali</li>
+        <li><b>Blocco nativo:</b> nessuna azione esterna parte senza il tuo click</li>
       </ul>
     </td>
   </tr>
@@ -85,68 +58,126 @@
 
 ---
 
-## 🏗️ Architettura in 1 Colpo d'Occhio
+## 🔄 3. Come Funziona un Ordine? (Il Ciclo in 4 Step)
 
 ```mermaid
 flowchart LR
-    UI["📱 Web Console 3D\nReact · Three.js · SVG"] <-->|"SSE Real-Time\nShim Firebase"| API["⚡ Starlette API\ndocs.db · events.db"]
-    TG["💬 Telegram Bot\nNotifiche & Conferme"] <--> API
-    API <--> COO["🎯 COO + 14 Agenti\nClaude Agent SDK · MCP"]
-    COO -->|"PreToolUse Hook"| POL["🛡️ Policy Gate\nLettura · Approvazione"]
-    COO -->|"Pool Fallback"| RT["🔀 Router LLM\nOpenRouter · Gemini · NVIDIA · Groq"]
+    S1["1️⃣ DAI L'ORDINE\nDa Console 3D o Telegram\n'Rifai il sito X' / 'Cosa scade?'"] --> S2["2️⃣ IL COO SMISTA\nDelega agli specialisti\nche si spostano nell'Ufficio 3D"]
+    S2 --> S3["3️⃣ HOOK PERMESSI\nLetture = subito\nModifiche/Deploy = in attesa su SQLite"]
+    S3 --> S4["4️⃣ TU APPROVI (1-CLICK)\nTrascini su 'Completati'\no premi Conferma su Telegram"]
 ```
 
 ---
 
-## 🤖 La Squadra: 15 Agenti in 5 Reparti (`agents/*.md`)
+## 🤖 4. Chi Lavora per Te e Cosa Puoi Chiedergli? (15 Agenti in 5 Reparti)
 
-| Reparto | Agenti | Cosa Fanno in Autonomia | Strumenti MCP / Nativi |
-| :--- | :--- | :--- | :--- |
-| 🎯 **Direzione & Memoria** | `COO` · `Memory Keeper` | Riceve ordini, smista i task agli specialisti e trasforma le tue correzioni in regole permanenti. | `Agent`, `Skill`, `memory`, `learning` |
-| 💼 **CRM & Commerciale** | `Account CRM` · `Commerciale` · `Project Manager` | Schede clienti, incassi, progetti fermi, scadenze e preventivi calcolati via codice dal listino. | `crm_read`, `projects_read`, `pricing`, `drafts`, `proposals` |
-| 🎨 **Fabbrica Siti Web** | `Direttore Creativo` · `Art Director` · `Copywriter` · `Costruttore Siti` · `Deployer` | Da link Google Maps o nome → `spec.json`, art direction, copy, build verificato in Playwright e deploy. | `site_design`, `site_art`, `site_copy`, `site_build`, `powers` |
-| 🔍 **Audit & Qualità** | `SEO` · `Performance` · `Sicurezza` | Audit passivi su Core Web Vitals, meta tag/JSON-LD, certificati TLS e header HTTP (CSP, HSTS). | `web_audit`, `projects_read` (`autonomy: 0`) |
-| ⚙️ **Infra & Sentinella** | `Sentinella` · `Ops Uptime` | Uptime siti, salute servizi server, test automatico modelli gratuiti e aggiornamento pool `models.yaml`. | `system_read`, `system_improve`, `ops_read` |
+| Reparto | Agenti Inclusi | Cosa Puoi Chiedergli Subito (Esempi Reali) | Permessi |
+| :--- | :--- | :--- | :---: |
+| 🎯 **Direzione & Memoria** | `COO` · `Memory Keeper` | *"Pianifica i lavori della settimana"* · Impara in automatico quando sposti una scheda in **Correzioni** con una nota. | Propone (`1`) |
+| 💼 **CRM & Commerciale** | `Account CRM` · `Commerciale` · `Project Manager` | *"Cosa scade nei prossimi 14 giorni?"* · *"Quali progetti sono fermi?"* · *"Prepara un preventivo per il cliente X"*. | Propone (`1`) |
+| 🎨 **Fabbrica Siti Web** | `Direttore Creativo` · `Art Director` · `Copywriter` · `Costruttore Siti` · `Deployer` | *"Crea il sito per [Nome / Link Maps]"* → genera struttura, art direction, copy, HTML/3D testato in Playwright e anteprima. | Deploy dietro tuo OK (`1`) |
+| 🔍 **Audit & Qualità** | `SEO` · `Performance` · `Sicurezza` | *"Fai un audit SEO, velocità e sicurezza di tutti i nostri siti"* (verifica Core Web Vitals, meta tag, TLS, CSP/HSTS). | Sola lettura (`0`) |
+| ⚙️ **Infra & Sentinella** | `Sentinella` · `Ops Uptime` | *"Tutti i siti e i servizi sono online?"* · Testa da sola i nuovi modelli gratuiti e aggiorna i pool di `models.yaml`. | Auto-tuning (`2`) |
 
 ---
 
-## 🚀 Quickstart (4 Comandi)
+## 📱 5. Cosa Trovi nella Web Console? (5 Viste Ottimizzate Mobile & Desktop)
+
+<table>
+  <tr>
+    <td width="20%" valign="top" align="center">
+      <b>📊 Pannello</b><br/><br/>
+      Toggle periodo su 1 riga, <b>6 card (3×2)</b> e <b>3 Grafici a Torta SVG</b> (Task, Azioni, Token).
+    </td>
+    <td width="20%" valign="top" align="center">
+      <b>🏢 Ufficio 3D</b><br/><br/>
+      Sala riunioni centrale, <b>camera zoomata</b> sul gruppo di agenti e 3 riquadri live.
+    </td>
+    <td width="20%" valign="top" align="center">
+      <b>🗂️ Task</b><br/><br/>
+      <b>Tavola Figma</b> infinita (pan/zoom + Triage) + <b>Tabella</b> con export CSV e approvazione drag&drop.
+    </td>
+    <td width="20%" valign="top" align="center">
+      <b>👥 Squadra</b><br/><br/>
+      Card compatte <b>3 per riga</b> con <b>barra token reali</b> (<code>events.db</code>) e scheda dettagli al click.
+    </td>
+    <td width="20%" valign="top" align="center">
+      <b>⚙️ Sistema</b><br/><br/>
+      Salute servizi, quote provider LLM, lavori recenti e ultimi 40 eventi reali.
+    </td>
+  </tr>
+</table>
+
+---
+
+## 🚀 6. Come Lo Installi e Accedi in 3 Minuti
 
 ```bash
-# 1. Clona e installa il backend Python + Claude Code
+# 1. Clona il repo e prepara Python + Claude Code
+sudo apt update && sudo apt -y install python3-venv python3-pip git sqlite3 nodejs npm
 git clone https://github.com/Lorenzozero/agency-ai-3d-starter.git ~/hermes_lab && cd ~/hermes_lab
 python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
-cp .env.example .env && chmod 600 .env   # Inserisci le chiavi API in .env
+sudo npm install -g @anthropic-ai/claude-code
 
-# 2. Compila la Web Console 3D
+# 2. Configura le chiavi API (OpenRouter / Gemini / Groq / NVIDIA o login 'claude')
+cp .env.example .env && chmod 600 .env && nano .env
+
+# 3. Compila il Frontend 3D e genera il tuo Token di Login
 cd app && npm install && npm run build && cd ..
+python -m hlab check
+python -m hlab api-token     # <-- Copia questo token: ti serve per entrare nella pagina web
 
-# 3. Verifica i 15 agenti, le 20 skills e genera il token di login
-python -m hlab check && python -m hlab api-token
-
-# 4. Avvia Router Multi-Provider (8787) e Console API (8770)
+# 4. Avvia Router LLM (8787) + Console Web (8770)
 python -m hlab router &
 python -m hlab api --host 127.0.0.1 --port 8770
 ```
 
-<details>
-<summary><b>📂 Struttura della Repository (clicca per espandere)</b></summary>
+> 📱 **Come aprirlo da smartphone/fuori casa senza aprire porte nel firewall:**  
+> Lancia `cloudflared tunnel --url http://127.0.0.1:8770` (oppure `tailscale funnel 8770`), apri l'URL HTTPS generato e incolla il token restituito da `python -m hlab api-token`.
 
+---
+
+## 🛠️ 7. Come Personalizzi o Aggiungi un Agente Tuo?
+
+Non devi toccare il motore Python: **ogni agente è un semplice file Markdown** dentro [`agents/`](agents/_template.md) (oppure clicchi *Modifica* direttamente dalla vista **Squadra** nella GUI):
+
+```markdown
+---
+name: mio-agente
+description: Spiega in 1 riga al COO quando delegare a questo agente.
+model: sonnet
+mcp: [crm_read, proposals]   # Solo i gruppi di strumenti che gli concedi
+autonomy: 1                  # 0 = solo lettura | 1 = propone e aspetta il tuo OK | 2 = reversibile
+max_turns: 10
+---
+Scrivi qui in italiano il mansionario e le regole che l'agente deve seguire.
+```
+
+<details>
+<summary><b>⚙️ Mantenimento H24 con Systemd, Struttura File e Test Suite (clicca per espandere)</b></summary>
+
+### Avvio automatico H24 (`systemd`)
+```bash
+sudo cp deploy/hlab-*.service deploy/hlab-*.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now hlab-router hlab-api hlab-worker hlab-sentinella.timer hlab-backup.timer
+```
+
+### Mappa delle Cartelle
 ```text
 agency-ai-3d-starter/
-├── agents/                 # 15 definizioni agenti (Markdown + YAML frontmatter)
-├── .claude/skills/         # 20 skills operative (audit, copy, siti, CRM, preventivi)
-├── app/                    # Frontend React + Three.js + Shim Firebase → SQLite
-│   └── src/shim/           # 3 file che sostituiscono Firebase con Starlette/SSE
-├── hlab/                   # Motore Python (API, sync, policy, router, sitefactory, tools MCP)
-├── deploy/                 # Unit systemd (.service / .timer) e ruolo SQL read-only
-├── models.yaml             # Pool di modelli LLM con rotazione e fallback
-└── tests/                  # Suite completa pytest (28 moduli)
+├── agents/            # 15 agenti IA in Markdown (coo, account-crm, commerciale, deployer, sentinella...)
+├── .claude/skills/    # 20 skills operative (audit, copy, costruzione siti, preventivi, salute sistema)
+├── app/               # Web Console React + Three.js + Shim Firebase → SQLite (src/shim/*)
+├── hlab/              # Backend Python (api, api_sync, docstore, events, policy, router, sitefactory, tools)
+├── deploy/            # Servizi systemd, timer e script SQL ruolo read-only per CRM Postgres
+├── models.yaml        # Configurazione pool modelli gratuiti e fallback del router
+└── tests/             # 28 moduli di test automatici (esegui con: pytest -q)
 ```
 </details>
 
 ---
 
 <div align="center">
-  <sub>Guida completa sul blog: <a href="https://portfolio-lorenzo-garoffolo.vercel.app/blog/squadra-agenti-ia-claude-code-attivita">Come costruirsi una squadra di agenti IA con Claude Code e Ufficio 3D</a> · Licenza MIT (<a href="app/LICENSE-ederland">Agentes IA 3D</a>)</sub>
+  <sub>📖 <b>Guida architetturale completa passo-passo:</b> <a href="https://portfolio-lorenzo-garoffolo.vercel.app/blog/squadra-agenti-ia-claude-code-attivita">Come ti costruisci una squadra di agenti IA che gestisce la tua attività</a> · Base 3D derivata da <a href="app/LICENSE-ederland">Agentes IA 3D (MIT)</a></sub>
 </div>
