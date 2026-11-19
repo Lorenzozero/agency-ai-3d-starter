@@ -369,10 +369,10 @@ async def site_factory(ctx, payload):
 
     # 3. Costruttore
     tracker.update("costruttore", "assemblaggio componenti e validazione QA in corso...", icon="🔨", progress=65, eta="~1m 15s rimanenti")
-    out_b = await ctx.step("costruttore", lambda: run(prompts["costruttore"], on_text=lambda t: None))
-    rep = sf.report(work)
-    if rep is None:
-        rep = sf.build(work)
+    # Build deterministica diretta (niente giro LLM: evitava ~90s e una doppia build)
+    rep = await ctx.step("costruttore", lambda: sf.build(work))
+    if not rep or "errore" in rep:
+        rep = sf.report(work) or rep
     sezioni_count = len(rep.get('sezioni', [])) if rep else len(spec.get('sections', []))
     tracker.update("costruttore", f"build verificata ({sezioni_count} sezioni, 0 errori)", progress=80, eta="~45s rimanenti")
 
