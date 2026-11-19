@@ -139,9 +139,9 @@ export default function OfficeView() {
         const working = tasks.find(t => t.asignado === a.id && t.estado === 'en_progreso' && !t.timerPaused)
         const paused = tasks.find(t => t.asignado === a.id && t.estado === 'en_progreso')
         const status = !a.active ? 'reserva' : statusFor({ online: true, onBreak, working, paused })
-        // Dove sta un agente: al lavoro nel suo ufficio; in sala allineamento & collaborazione; in riserva in giardino
+        // Dove sta un agente: ciascuno nel suo ufficio privato/scrivania; in sala allineamento solo se c'è un briefing attivo; in giardino se in riserva
         let place = nextPlace(status, home)
-        const inMeeting = a.active && (briefingOn || status === 'disponible')
+        const inMeeting = a.active && briefingOn
         if (inMeeting) {
           place = { type: 'meeting', index: meetN++ }
         }
