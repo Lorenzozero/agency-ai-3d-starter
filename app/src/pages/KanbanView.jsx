@@ -763,14 +763,19 @@ export default function KanbanView() {
               <SortTh label="Inizio" col="fechaInicio" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
               <SortTh label="Consegna" col="fechaEntrega" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
               <th>Durata</th>
-              <th></th>
             </tr>
           </thead>
           <tbody>
             {sortedTableTasks.map(task => {
               const assignedUser = getUserById(task.asignado)
-              const canEdit = isAdmin || (task.asignado === user.uid)
               const due = dueInfo(task)
+              const stLabel = {
+                pendiente: 'Da fare',
+                en_progreso: 'In corso',
+                en_espera: 'In attesa',
+                en_revision: 'Correzioni',
+                completada: 'Completato',
+              }[task.estado] || task.estado
               return (
                 <tr key={task.id} style={{ cursor: 'pointer' }} onClick={() => openEditTask(task)}>
                   <td style={{ maxWidth: 240 }}>
@@ -800,30 +805,10 @@ export default function KanbanView() {
                     </div>
                   </td>
                   <td><span className={`badge badge-${task.prioridad}`}>{task.prioridad}</span></td>
-                  <td onClick={e => e.stopPropagation()}>
-                    {canEdit ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                        <select
-                          className="form-select"
-                          style={{ fontSize: 12, padding: '3px 6px', width: 'auto' }}
-                          value={task.estado}
-                          onChange={e => moveTask(task, e.target.value)}
-                        >
-                          <option value="pendiente">Da fare</option>
-                          <option value="en_progreso">In corso</option>
-                          <option value="en_espera">In attesa</option>
-                          <option value="en_revision">Revisione</option>
-                          <option value="completada">Completato</option>
-                        </select>
-                        {task.timerPaused && task.estado === 'en_progreso' && (
-                          <span className="badge badge-paused" style={{ fontSize: 10 }}>⏸</span>
-                        )}
-                      </div>
-                    ) : (
-                      <span className={`badge ${task.timerPaused && task.estado === 'en_progreso' ? 'badge-paused' : `badge-${task.estado}`}`}>
-                        {task.timerPaused && task.estado === 'en_progreso' ? '⏸ In pausa' : task.estado.replace('_', ' ')}
-                      </span>
-                    )}
+                  <td>
+                    <span className={`badge badge-${task.estado}`}>
+                      {stLabel}
+                    </span>
                   </td>
                   <td>
                     {due ? (
@@ -847,30 +832,6 @@ export default function KanbanView() {
                   </td>
                   <td style={{ fontSize: 12, fontFamily: 'Space Mono' }}>
                     {fmtDuration(task.totalTimeSeconds)}
-                  </td>
-                  <td onClick={e => e.stopPropagation()}>
-                    <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                      {canEdit && (
-                        <button
-                          className="btn btn-ghost btn-sm btn-icon"
-                          onClick={() => openEditTask(task)}
-                          title="Modifica"
-                        ><Icon name="edit" size={13} /></button>
-                      )}
-                      <button
-                        className="btn btn-ghost btn-sm btn-icon"
-                        onClick={() => handleDuplicate(task)}
-                        title="Duplica come modello"
-                      ><Icon name="copy" size={13} /></button>
-                      {isAdmin && (
-                        <button
-                          className="btn btn-ghost btn-sm btn-icon"
-                          style={{ color: 'var(--danger)' }}
-                          onClick={() => handleDelete(task)}
-                          title="Elimina"
-                        ><Icon name="trash" size={13} /></button>
-                      )}
-                    </div>
                   </td>
                 </tr>
               )
@@ -967,21 +928,18 @@ function CompactCard({ task, assignedUser, draggable, onDragStart, onEdit, canDe
   )
 }
 
-function KanbanCard({ task, assignedUser, draggable, canEdit, canDelete, canPause, expanded, onToggleExpand, onDragStart, onEdit, onDelete, onPauseResume, onMoveStep, onDuplicate, canClaim, onClaim, onStartNow, colIndex, totalCols }) {
-  const isPausedActive = task.timerPaused && task.estado === 'en_progreso'
+function KanbanCard({ task, assignedUser, onEdit }) {
   const due = dueInfo(task)
 
   return (
     <div
       className="kanban-card"
-      draggable={draggable}
-      onDragStart={draggable ? e => onDragStart(e, task.id) : undefined}
       style={{ cursor: 'pointer', padding: '12px 14px', position: 'relative' }}
       onClick={() => onEdit(task)}
       title="Clicca per aprire i dettagli"
     >
-      {/* Top Header: Centered Badges + Discreet Move buttons */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 8, position: 'relative' }}>
+      {/* Top Header: Centered Badges */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
           <span className={`badge badge-${task.prioridad}`} style={{ fontSize: 9.5, padding: '2px 8px', borderRadius: 99 }}>
             {task.prioridad}
@@ -996,33 +954,9 @@ function KanbanCard({ task, assignedUser, draggable, canEdit, canDelete, canPaus
             </span>
           )}
         </div>
-
-        {/* Discreet move arrows on the right */}
-        {draggable && (
-          <div style={{ display: 'flex', gap: 2, position: 'absolute', right: 0, top: 0 }} onClick={e => e.stopPropagation()}>
-            <button
-              className="btn btn-ghost btn-sm btn-icon"
-              style={{ width: 20, height: 20, padding: 0, opacity: colIndex === 0 ? 0.2 : 0.7 }}
-              disabled={colIndex === 0}
-              onClick={() => onMoveStep(task, -1)}
-              title="Colonna precedente"
-            >
-              <Icon name="chevronL" size={11} />
-            </button>
-            <button
-              className="btn btn-ghost btn-sm btn-icon"
-              style={{ width: 20, height: 20, padding: 0, opacity: colIndex === totalCols - 1 ? 0.2 : 0.7 }}
-              disabled={colIndex === totalCols - 1}
-              onClick={() => onMoveStep(task, 1)}
-              title="Colonna successiva"
-            >
-              <Icon name="chevronR" size={11} />
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* Task Title - Centered & Justified */}
+      {/* Task Title - Centered */}
       <div className="kanban-card-title" style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 6, lineHeight: 1.4, textAlign: 'center', color: 'var(--text)' }}>
         {task.tarea}
       </div>
@@ -1035,7 +969,7 @@ function KanbanCard({ task, assignedUser, draggable, canEdit, canDelete, canPaus
       )}
 
       {/* Meta Row: Client + Assigned - Centered */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap', fontSize: 11, color: 'var(--text-3)', marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap', fontSize: 11, color: 'var(--text-3)' }}>
         {task.cliente && (
           <span style={{ fontWeight: 600, color: 'var(--text-2)' }}>{task.cliente}</span>
         )}
@@ -1053,61 +987,6 @@ function KanbanCard({ task, assignedUser, draggable, canEdit, canDelete, canPaus
               </div>
           }
           <span>{assignedUser?.name?.split(' ')[0] || 'Non assegnato'}</span>
-        </div>
-      </div>
-
-      {/* Triage Fast Action: Avvia Subito */}
-      {task.estado === 'pendiente' && onStartNow && (
-        <div style={{ textAlign: 'center', marginBottom: 8 }} onClick={e => e.stopPropagation()}>
-          <button
-            className="btn btn-primary btn-sm"
-            style={{ width: '100%', justifyContent: 'center', padding: '4px 10px', fontSize: 11.5, borderRadius: 8, gap: 5 }}
-            onClick={() => onStartNow(task)}
-            title="Avvia subito in lavorazione e fai partire il timer"
-          >
-            <Icon name="play" size={11} /> Avvia subito
-          </button>
-        </div>
-      )}
-
-      {/* Footer: Timer / Claim + Centered Icon Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 6, borderTop: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <WorkedTime task={task} />
-          {canClaim && task.estado !== 'pendiente' && (
-            <button
-              className="btn btn-secondary btn-sm"
-              style={{ padding: '2px 8px', fontSize: 10.5, borderRadius: 4 }}
-              onClick={e => { e.stopPropagation(); onClaim(task); }}
-              title="Assegnamelo"
-            >
-              + Prendi
-            </button>
-          )}
-        </div>
-
-        {/* Minimal Actions Toolbar */}
-        <div style={{ display: 'flex', gap: 3, alignItems: 'center' }} onClick={e => e.stopPropagation()}>
-          {task.estado === 'en_progreso' && canPause && !task.pendingAcceptance && (
-            <button
-              className="btn btn-ghost btn-sm btn-icon"
-              style={{ width: 22, height: 22, padding: 0, color: isPausedActive ? 'var(--success)' : 'var(--danger)' }}
-              onClick={() => onPauseResume(task)}
-              title={isPausedActive ? 'Riprendi timer' : 'Metti in pausa'}
-            >
-              <Icon name={isPausedActive ? 'play' : 'pause'} size={12} />
-            </button>
-          )}
-          {canDelete && (
-            <button
-              className="btn btn-ghost btn-sm btn-icon"
-              style={{ width: 22, height: 22, padding: 0, color: 'var(--danger)' }}
-              onClick={() => onDelete(task)}
-              title="Elimina"
-            >
-              <Icon name="trash" size={12} />
-            </button>
-          )}
         </div>
       </div>
     </div>

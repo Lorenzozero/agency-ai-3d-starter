@@ -968,6 +968,5 @@ function MyMetricsPanel({ myTasks, myDone, myPending, myReview }) {
 }
 
 export default function Dashboard() {
-  const { isAdmin } = useApp()
-  return isAdmin ? <AdminDashboard /> : <EmployeeDashboard />
+  return <AdminDashboard />
 }

@@ -321,7 +321,6 @@ export default function App() {
           </main>
         </div>
 
-        <PomodoroWidget />
         <ActivityWatchdog />
 
         {toast && (

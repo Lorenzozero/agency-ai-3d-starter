@@ -538,37 +538,17 @@ function MemberDetailModal({
           </div>
         )}
 
-        {/* Azioni operative */}
-        <div style={{ display: 'flex', gap: 6, borderTop: '1px solid var(--border)', paddingTop: 12, marginTop: 14, flexWrap: 'wrap' }}>
-          {isAgent && isAdmin && (
-            <>
-              <button
-                className="btn btn-secondary btn-sm"
-                style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}
-                onClick={() => { onClose(); onEditAgent(item) }}
-              >
-                <Icon name="edit" size={12} /> Modifica
-              </button>
-              <button
-                className="btn btn-ghost btn-sm"
-                style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}
-                onClick={() => onToggleAgent(item)}
-              >
-                <Icon name={isOn ? 'pause' : 'play'} size={12} /> {isOn ? 'Metti in riserva' : 'Attiva'}
-              </button>
-              {isSuperAdmin && (
-                <button
-                  className="btn btn-ghost btn-sm"
-                  style={{ color: 'var(--danger)', padding: '5px 8px' }}
-                  title="Elimina agente"
-                  onClick={() => { onClose(); onRemoveAgent(item) }}
-                >
-                  <Icon name="trash" size={13} />
-                </button>
-              )}
-            </>
-          )}
-          <button className="btn btn-primary btn-sm" style={{ marginLeft: 'auto', padding: '5px 14px' }} onClick={onClose}>
+        {/* Info Telegram Only */}
+        <div style={{
+          fontSize: 11.5, color: 'var(--text-2)', background: 'rgba(124,58,237,0.1)',
+          border: '1px solid rgba(167,139,250,0.25)', borderRadius: 8, padding: '8px 12px',
+          textAlign: 'center', marginTop: 12, marginBottom: 14
+        }}>
+          💬 Gli ordini agli agenti si inviano esclusivamente via <strong>Telegram</strong>.
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button className="btn btn-primary btn-sm" style={{ padding: '6px 18px' }} onClick={onClose}>
             Chiudi
           </button>
         </div>

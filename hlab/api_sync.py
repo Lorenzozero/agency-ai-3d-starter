@@ -377,17 +377,10 @@ def attach_feedback_hooks(store: Store, learning=None) -> None:
 
 
 def start(store: Store):
-    """Funzione di avvio per Starlette: primo allineamento subito, poi uno ogni SYNC_EVERY_S secondi, nel ciclo degli eventi (le scritture avvisano gli ascoltatori)."""
+    """Funzione di avvio per Starlette: la GUI è di sola telemetria/lettura; gli ordini agli agenti arrivano esclusivamente da Telegram."""
     async def on_start():
         store.bind_loop(asyncio.get_running_loop())
-        attach_hooks(store)
-        attach_agent_files(store)
-        attach_feedback_hooks(store)
         sync_once(store)
-        from . import briefing, chat, taskrun
-        chat.start_loop(store)
-        taskrun.start_loop(store)
-        briefing.start_loop(store)
 
         async def crm_loop():
             while True:
