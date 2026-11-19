@@ -102,39 +102,27 @@ export default function OfficeView() {
       return paused ? 'pausa' : 'disponible'
     }
 
-    const employees = users
-      .filter(u => u.role !== 'pending' && u.email)
-      .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-    // Oficinas privadas para administradores: el dueño primero
-    const officeOwners = employees
-      .filter(u => u.role === 'admin')
-      .sort((a, b) => (b.email === SUPER_ADMIN_EMAIL) - (a.email === SUPER_ADMIN_EMAIL))
-      .slice(0, 3)
+    // Vista 3D riservata esclusivamente agli AGENTI AI (nessun avatar umano / founder rimosso come richiesto)
     let deskN = 0
-    employees.forEach((u) => {
-      const online = u.lastSeen && now - toMs(u.lastSeen) < ONLINE_MS
-      const onBreak = u.breakUntil && toMs(u.breakUntil) > now ? (u.breakType || 'cafe') : null
-      const working = tasks.find(t => t.asignado === u.uid && t.estado === 'en_progreso' && !t.timerPaused && !t.pendingAcceptance)
-      const paused = tasks.find(t => t.asignado === u.uid && t.estado === 'en_progreso')
-      const status = statusFor({ online, onBreak, working, paused })
-      const officeIdx = officeOwners.findIndex(o => o.uid === u.uid)
-      const home = officeIdx >= 0 ? { type: 'office', index: officeIdx } : { type: 'desk', zone: 'team', index: deskN++ }
-      list.push({
-        id: `u:${u.uid}`, kind: 'empleado', ref: u, name: u.name?.split(' ')[0] || 'Senza nome',
-        fullName: u.name, role: u.position || (officeIdx >= 0 ? 'Direzione' : 'Squadra'), status,
-        task: working || paused,
-        look: userLook(u),
-        place: nextPlace(status, home), activity: ACTIVITY[status] || 'idle',
-      })
-    })
 
     let labN = 0, meetN = 0, idleN = 0
+    let teamN = 0
     const briefingOn = !!briefing?.until && briefing.until > now
     agents
       .slice()
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       .forEach((a) => {
-        const home = isCoordinador(a) ? { type: 'coordinator', index: 0 } : { type: 'desk', zone: 'lab', index: labN++ }
+        // Se l'agente è il coordinatore va al banco di controllo centrale;
+        // La Sentinella (SOC) riceve l'ufficio dirigenziale a nord (ex Direzione);
+        // Gli altri occupano i 10 uffici privati del lab; se superano 10 vanno alla postazione operativa team.
+        const isSentinel = a.id === 'sentinella' || a.rol === 'sentinella' || a.name?.toLowerCase().includes('sentinella')
+        const home = isCoordinador(a)
+          ? { type: 'coordinator', index: 0 }
+          : isSentinel
+            ? { type: 'office', index: 0 }
+            : labN < 10
+              ? { type: 'desk', zone: 'lab', index: labN++ }
+              : { type: 'desk', zone: 'team', index: teamN++ }
         const onBreak = a.active && a.breakUntil && toMs(a.breakUntil) > now ? (a.breakType || 'cafe') : null
         const working = tasks.find(t => t.asignado === a.id && t.estado === 'en_progreso' && !t.timerPaused)
         const paused = tasks.find(t => t.asignado === a.id && t.estado === 'en_progreso')
@@ -190,8 +178,7 @@ export default function OfficeView() {
         enqueue([{ who: coordId, to: who, label: 'consegna un task' }])
       }
       if (before && before.estado !== 'en_espera' && t.estado === 'en_espera' && t.agentStatus === 'done' && isAgent(t.asignado)) {
-        const steps = who !== coordId ? [{ who, to: coordId, label: 'entregando al coordinador' }] : []
-        if (ownerId) steps.push({ who: coordId, to: ownerId, label: 'entregando al jefe' })
+        const steps = who !== coordId ? [{ who, to: coordId, label: 'consegna al coordinatore' }] : []
         enqueue(steps)
       }
     }

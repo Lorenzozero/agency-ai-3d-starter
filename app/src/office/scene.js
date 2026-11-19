@@ -406,7 +406,7 @@ function buildOffice(scene, nav, nav1) {
   b.box(B.x1 - B.x0, 0.04, 0.04, M.purpleGlow, 0, 0.02, ZN, { shadow: false })        // strisce luminose sul corridoio
   b.box(B.x1 - B.x0, 0.04, 0.04, M.purpleGlow, 0, 0.02, ZS, { shadow: false })
 
-  // Direzione (primo ufficio a nord): scrivania del titolare, libreria, visitatori
+  // Ufficio Sentinella & SOC (ex Direzione, assegnato all'agente Sentinella di sorveglianza)
   const cd = B.x0 + CW / 2
   b.box(1.9, 0.06, 0.8, M.deskWood, cd, 0.62, -8.0)
   b.box(1.8, 0.6, 0.06, M.deskWood, cd, 0.31, -7.65)
@@ -421,7 +421,7 @@ function buildOffice(scene, nav, nav1) {
   b.officeChair(cd + 0.5, -6.9, Math.PI, M.fabric)
   b.bookshelf(B.x0 + CW - 0.35, -8.2, -Math.PI / 2, 1.6)
   b.plant(B.x0 + 0.5, B.z0 + 0.5, 1.0)
-  b.sign('Direzione', cd, 1.95, ZN + 0.04, 2.0)
+  b.sign('Sentinella SOC', cd, 1.95, ZN + 0.04, 2.0)
 
   // Un ufficio per agente: stessa scrivania, stessa libreria, stessa pianta. Il secondo a nord e' del COO (anello olografico)
   const ROWS = [{ chairZ: -9.0, frontZ: ZN, mid: -8.2, plantZ: B.z0 + 0.5 }, { chairZ: 6.9, frontZ: ZS, mid: 8.0, plantZ: B.z1 - 0.5 }]
