@@ -1,0 +1,14 @@
+[Unit]
+Description=hlab backup (copia notturna di archivio, eventi, memoria, vault e agenti)
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/hermes_lab
+Environment=HLAB_HOME=/home/ubuntu/hermes_lab
+ExecStart=/home/ubuntu/hermes_lab/venv/bin/python -m hlab.backup
+Nice=10
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/home/ubuntu/hermes_backups
+PrivateTmp=yes

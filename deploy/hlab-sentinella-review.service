@@ -1,0 +1,16 @@
+[Unit]
+Description=hlab Sentinella: revisione quotidiana (accoda il lavoro: lo esegue il worker con l'agente sentinella)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/hermes_lab
+Environment=HLAB_HOME=/home/ubuntu/hermes_lab
+EnvironmentFile=/home/ubuntu/hermes_lab/.env
+ExecStart=/home/ubuntu/hermes_lab/venv/bin/python -m hlab sentinel review
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ubuntu/hermes_lab/data
+PrivateTmp=yes

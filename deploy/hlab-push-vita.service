@@ -1,0 +1,18 @@
+[Unit]
+Description=hlab -> Vita: riepilogo del CRM in sola lettura (nessun dato di contatto)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/hermes_lab
+Environment=HLAB_HOME=/home/ubuntu/hermes_lab
+# solo il .env di hlab: ruolo Postgres di sola lettura + HLAB_VITA_PUSH_URL / HLAB_VITA_PUSH_KEY (NON hermes.env, che ha il proprietario del DB)
+EnvironmentFile=/home/ubuntu/hermes_lab/.env
+ExecStart=/home/ubuntu/hermes_lab/venv/bin/python -m hlab.push_vita
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+# i database SQLite in WAL vogliono creare il file -shm anche in lettura: la cartella dati resta scrivibile, il programma apre i database in sola lettura
+ReadWritePaths=/home/ubuntu/hermes_lab/data
+PrivateTmp=yes

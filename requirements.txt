@@ -1,0 +1,7 @@
+# venv dedicato ~/hermes_lab/venv (Python 3.12, aarch64). Separato da quello di Hermes in produzione.
+claude-agent-sdk==0.2.163
+fastembed
+sqlite-vec
+pyyaml
+psycopg2-binary
+pytest

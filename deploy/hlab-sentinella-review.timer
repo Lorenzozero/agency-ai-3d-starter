@@ -1,0 +1,10 @@
+[Unit]
+Description=hlab Sentinella: revisione quotidiana alle 06:30 (ora italiana)
+
+[Timer]
+OnCalendar=*-*-* 06:30:00 Europe/Rome
+Persistent=true
+RandomizedDelaySec=120
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,10 @@
+[Unit]
+Description=hlab -> Vita ogni 15 minuti
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=15min
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

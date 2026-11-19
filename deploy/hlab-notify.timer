@@ -1,0 +1,10 @@
+[Unit]
+Description=hlab notify ogni 15 minuti
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=15min
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

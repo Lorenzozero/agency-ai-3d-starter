@@ -1,0 +1,31 @@
+# Secrets & Environment
+.env
+.env.local
+*.key
+api_token
+
+# Runtime Data & Databases
+data/
+*.db
+*.db-shm
+*.db-wal
+*.jsonl
+*.out
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.pytest_cache/
+
+# Frontend / Node
+app/node_modules/
+app/dist/
+node_modules/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db

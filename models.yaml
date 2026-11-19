@@ -1,0 +1,89 @@
+# Pool di modelli dell'instradatore locale (OpenRouter). Gli agenti usano gli alias dell'SDK:
+#   sonnet / opus -> pool "strong" (lavori che richiedono ragionamento: COO, Commerciale)
+#   haiku         -> pool "light"  (letture e riassunti: Account, Project Manager)
+# Ogni pool ha DUE LIVELLI, riconosciuti dal nome: i `:free` (e openrouter/free) si provano per primi, a rotazione; se OpenRouter segnala il
+# limite giornaliero (50 richieste sotto i 10 crediti acquistati) il livello gratuito si chiude fino a mezzanotte UTC e si passa ai modelli
+# a pagamento, che costano frazioni di centesimo a richiesta e hanno un tetto di spesa giornaliero (limits.paid_usd_per_day).
+# Prezzi in $ per milione di token (entrata/uscita) dal catalogo del 2026-11-02; l'elenco cambia: `python scripts/free_models.py`.
+upstream: https://openrouter.ai/api
+listen: {host: 127.0.0.1, port: 8099}
+cooldown_s: 60
+max_wait_s: 15
+limits:
+  free_per_minute: 18      # OpenRouter: 20 al minuto per i modelli :free
+  free_per_day: 45         # 50 al giorno sotto i 10 crediti acquistati, 1000 sopra: alza questo valore se compri crediti
+  paid_usd_per_day: 0.60   # una richiesta agente costa circa 0,02-0,03 $ con questi modelli
+# Altri fornitori con quota gratuita (formato OpenAI, tradotto da translate.py): si provano DOPO i :free di OpenRouter e PRIMA di pagare.
+# Se un fornitore segnala il limite giornaliero il suo livello si chiude fino a mezzanotte UTC. `max_input_tokens`: soglia oltre la quale
+# quel fornitore viene saltato (una chiamata dell'agente pesa ~18.000 token: Groq free ha 8.000 token/minuto, Cloudflare 24.000 di contesto).
+# Per aggiungerne altri basta una voce e la chiave in .env (es. Gemini: https://generativelanguage.googleapis.com/v1beta/openai , Cerebras: https://api.cerebras.ai/v1).
+# REGOLA: mai pagare. `allow_paid: false` chiude per sempre il livello `paid` (nessun modello a pagamento, nemmeno richiesto per nome).
+# Le voci a pagamento nei pool restano solo come riserva documentata: per usarle serve una decisione esplicita di Lorenzo.
+allow_paid: false
+# Ordine: prima i fornitori con contesto grande (le chiamate degli agenti pesano 13.000-18.000 token), poi quelli piccoli. Un fornitore senza chiave in .env si salta da solo.
+tier_order: [openrouter, gemini, nvidia, groq, github, cloudflare, paid]
+providers:
+  gemini:                                   # Google AI Studio, piano gratuito: chiave di un progetto SENZA fatturazione, variabile GEMINI_FREE_API_KEY (diversa da GEMINI_API_KEY del bot)
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai
+    key_env: GEMINI_FREE_API_KEY
+    free: true
+    max_input_tokens: 120000
+    max_tokens: 4096
+    # Gemini 3 rifiuta (400) i turni successivi se le chiamate di strumento non portano una thought_signature: valore segnaposto documentato da Google
+    tool_call_extra: {extra_content: {google: {thought_signature: skip_thought_signature_validator}}}
+  nvidia:                                   # NVIDIA NIM (gratis, senza carta): chiave su build.nvidia.com (70 caratteri), variabile NVIDIA_API_KEY. Modelli provati il 2026-11-06: il catalogo cambia
+                                            # e molti (llama-3.x, kimi, deepseek, glm) non rispondono con questa chiave; mistral-large-4 e gemma-4-31b vanno in timeout con gli strumenti
+    base_url: https://integrate.api.nvidia.com/v1
+    key_env: NVIDIA_API_KEY
+    free: true
+    max_input_tokens: 40000
+    max_tokens: 4096
+  github:                                   # GitHub Models (gratis, limite ~8.000 token in ingresso): token dedicato con permesso models:read in GITHUB_MODELS_TOKEN
+    base_url: https://models.github.ai/inference
+    key_env: GITHUB_MODELS_TOKEN
+    free: true
+    max_input_tokens: 7500
+    max_tokens: 2048
+  groq:
+    base_url: https://api.groq.com/openai/v1
+    key_env: GROQ_API_KEY
+    free: true
+    max_input_tokens: 6500
+    max_tokens: 2048
+  cloudflare:
+    base_url: "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/ai/v1"
+    key_env: CF_API_TOKEN
+    free: true
+    max_input_tokens: 18000
+    max_tokens: 4096
+pools:
+  strong:
+    - {model: "nvidia/nemotron-3-ultra-550b-a55b:free"}
+    - {model: "google/gemma-4-31b-it:free"}
+    - {model: "nvidia/nemotron-3.5-super-vl:free"}
+    - {model: "thinkingmachines/inkling:free"}
+    - {model: "openai/gpt-oss-120b", provider: groq}
+    - {model: "gemini-3.5-flash", provider: gemini}
+    - {model: "gemini-3.6-flash", provider: gemini}
+    - {model: "poolside/laguna-xs-2.1", provider: nvidia}
+    - {model: "minimaxai/minimax-m3.1-flash", provider: nvidia}   # lento (10-13 s) ma affidabile con gli strumenti
+    - {model: "openai/gpt-4.1", provider: github}
+    - {model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", provider: cloudflare}
+    - {model: "anthropic/claude-haiku-5.5"}          # 0,10 / 0,50: il piu' compatibile con la CLI (strumenti, thinking, cache)
+    - {model: "deepseek/deepseek-v4.1-flash"}        # 0,04 / 0,50
+    - {model: "openai/gpt-oss-120b"}                 # 0,03 / 0,11
+  light:
+    - {model: "google/gemma-4-26b-a4b-it:free"}
+    - {model: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"}
+    - {model: "nvidia/nemotron-3.5-lightning:free"}
+    - {model: "openrouter/free"}
+    - {model: "openai/gpt-oss-20b", provider: groq}
+    - {model: "qwen/qwen3.8-27b", provider: groq}
+    - {model: "gemini-3.1-flash-lite", provider: gemini}
+    - {model: "nvidia/nemotron-3.5-bolt-e4b", provider: nvidia}
+    - {model: "poolside/laguna-xs-2.1", provider: nvidia}
+    - {model: "openai/gpt-4.1-mini", provider: github}
+    - {model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", provider: cloudflare}
+    - {model: "openai/gpt-oss-120b"}                 # 0,03 / 0,11
+    - {model: "qwen/qwen3.7-flash"}                  # 0,03 / 0,13
+    - {model: "z-ai/glm-5.3-flash"}                  # 0,03 / 0,09

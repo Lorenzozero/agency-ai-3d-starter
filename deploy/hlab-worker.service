@@ -1,0 +1,20 @@
+[Unit]
+Description=hlab worker (coda durevole SQLite: riprende i lavori interrotti)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/hermes_lab
+Environment=HLAB_HOME=/home/ubuntu/hermes_lab
+EnvironmentFile=/home/ubuntu/hermes_lab/.env
+ExecStart=/home/ubuntu/hermes_lab/venv/bin/python -m hlab worker
+Restart=always
+RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/home/ubuntu/hermes_lab/data
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

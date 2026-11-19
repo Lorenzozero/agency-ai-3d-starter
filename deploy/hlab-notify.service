@@ -1,0 +1,16 @@
+[Unit]
+Description=hlab notify (il COO ti scrive su Telegram: novita', decisioni da prendere, scadenze)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/hermes_lab
+Environment=HLAB_HOME=/home/ubuntu/hermes_lab
+EnvironmentFile=/home/ubuntu/hermes.env
+EnvironmentFile=/home/ubuntu/hermes_lab/.env
+ExecStart=/home/ubuntu/hermes_lab/venv/bin/python -m hlab notify
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/home/ubuntu/hermes_lab/data
+PrivateTmp=yes

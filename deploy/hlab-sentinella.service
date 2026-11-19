@@ -1,0 +1,24 @@
+[Unit]
+Description=hlab Sentinella: controlli di salute (servizi, limiti dei fornitori, server) e avvisi su Telegram
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/hermes_lab
+Environment=HLAB_HOME=/home/ubuntu/hermes_lab
+# hermes.env: TELEGRAM_TOKEN e ALLOWED_CHAT_IDS (come hlab-notify); .env: le chiavi dei fornitori per le sonde
+EnvironmentFile=/home/ubuntu/hermes.env
+EnvironmentFile=/home/ubuntu/hermes_lab/.env
+ExecStart=/home/ubuntu/hermes_lab/venv/bin/python -m hlab sentinel cycle
+# NIENTE NoNewPrivileges: deve poter riavviare (sudo -n systemctl restart) i soli servizi dell'elenco fisso in sentinel.HEAL_ALLOW, dopo due controlli falliti
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ubuntu/hermes_lab/data
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=no
+LockPersonality=yes
+TimeoutStartSec=240
