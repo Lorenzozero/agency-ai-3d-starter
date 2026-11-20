@@ -370,7 +370,8 @@ async def site_factory(ctx, payload):
     # 3. Costruttore
     tracker.update("costruttore", "assemblaggio componenti e validazione QA in corso...", icon="🔨", progress=65, eta="~1m 15s rimanenti")
     # Build deterministica diretta (niente giro LLM: evitava ~90s e una doppia build)
-    rep = await ctx.step("costruttore", lambda: sf.build(work))
+    # in un thread: una build sincrona di 90-150s bloccava l'event loop, il lease (120s) scadeva e il job ripartiva in doppio
+    rep = await ctx.step("costruttore", lambda: asyncio.to_thread(sf.build, work))
     if not rep or "errore" in rep:
         rep = sf.report(work) or rep
     sezioni_count = len(rep.get('sezioni', [])) if rep else len(spec.get('sections', []))
@@ -387,7 +388,7 @@ async def site_factory(ctx, payload):
     # 6. Auto-Publish diretto
     live_url = f"https://hermessscoo.github.io/{work}/"
     try:
-        pub = await ctx.step("publish", lambda: sf.publish(work))
+        pub = await ctx.step("publish", lambda: asyncio.to_thread(sf.publish, work))
         if pub and pub.get("url"):
             live_url = pub["url"]
     except Exception as e:
