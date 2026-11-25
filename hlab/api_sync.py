@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import os
 import platform
 import threading
 import shutil
@@ -412,14 +413,15 @@ def start(store: Store):
         store.bind_loop(asyncio.get_running_loop())
         sync_once(store)
 
-        async def crm_loop():
-            while True:
-                try:
-                    await asyncio.to_thread(crm_sync_once, store)
-                except Exception as e:                                 # CRM irraggiungibile: la GUI tiene i dati di prima
-                    print("crm_sync:", type(e).__name__, e, flush=True)
-                await asyncio.sleep(CRM_EVERY_S)
-        asyncio.get_event_loop().create_task(crm_loop())
+        if os.environ.get("HLAB_ENABLE_CRM", "0") == "1":
+            async def crm_loop():
+                while True:
+                    try:
+                        await asyncio.to_thread(crm_sync_once, store)
+                    except Exception as e:                                 # CRM irraggiungibile: la GUI tiene i dati di prima
+                        print("crm_sync:", type(e).__name__, e, flush=True)
+                    await asyncio.sleep(CRM_EVERY_S)
+            asyncio.get_event_loop().create_task(crm_loop())
 
         async def system_loop():                                       # pagina Sistema: servizi, piani, limiti, esecuzioni e token (hlab.services)
             from . import services
