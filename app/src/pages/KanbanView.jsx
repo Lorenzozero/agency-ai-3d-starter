@@ -187,8 +187,13 @@ export function dueInfo(task) {
 
 export default function KanbanView() {
   const { tasks, users, agents, clients: CLIENTES = [], isAdmin, user, userProfile, showToast, openEditTask, openNewTask, sendNotification } = useApp()
-  // Vista: 'board' (Pipeline Canvas) o 'table' (Elenco Tabellare)
-  const [viewMode, setViewMode] = useState(() => localStorage.getItem('hermes_task_view') || 'board')
+  // Vista: 'nodes' (Canvas a Nodi interattivo), 'board' (Pipeline Kanban classica) o 'table' (Elenco Tabellare)
+  const [viewMode, setViewMode] = useState(() => {
+    const saved = localStorage.getItem('hermes_task_view')
+    if (saved) return saved
+    return typeof window !== 'undefined' && window.innerWidth <= 768 ? 'nodes' : 'board'
+  })
+  const [activeNode, setActiveNode] = useState('all') // 'all' o column id
   const [dragOver, setDragOver] = useState(null)
   const [expandedId, setExpandedId] = useState(null)
   // Filtri condivisi
@@ -535,8 +540,20 @@ export default function KanbanView() {
       <div className="page-header" style={{ marginBottom: 8, display: 'flex', justifyContent: 'center' }}>
         <div className="page-actions btn-row" style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
           
-          {/* View Mode Toggle: Tavola vs Tabella */}
+          {/* View Mode Toggle: Nodi vs Tavola vs Tabella */}
           <div style={{ display: 'flex', background: 'var(--card-2)', borderRadius: 8, padding: 3, gap: 2 }}>
+            <button
+              className="btn btn-sm"
+              style={{
+                background: viewMode === 'nodes' ? 'var(--purple)' : 'transparent',
+                color: viewMode === 'nodes' ? '#fff' : 'var(--text-2)',
+                padding: '5px 12px', fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600
+              }}
+              onClick={() => { setViewMode('nodes'); localStorage.setItem('hermes_task_view', 'nodes') }}
+              title="Vista Canvas a Nodi (Ottimizzato per Mobile)"
+            >
+              <Icon name="flow" size={13} /> Nodi
+            </button>
             <button
               className="btn btn-sm"
               style={{
@@ -545,7 +562,7 @@ export default function KanbanView() {
                 padding: '5px 12px', fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600
               }}
               onClick={() => { setViewMode('board'); localStorage.setItem('hermes_task_view', 'board') }}
-              title="Vista Tavola (Pipeline)"
+              title="Vista Tavola (Kanban Standard)"
             >
               <Icon name="columns" size={13} /> Tavola
             </button>
@@ -609,7 +626,204 @@ export default function KanbanView() {
         </div>
       </div>
 
-      {viewMode === 'board' ? (
+      {viewMode === 'nodes' ? (
+        <div className="node-canvas-container">
+          {/* Stepper superiore orizzontale a nodi per navigazione rapida */}
+          <div className="node-stepper-bar">
+            <button
+              className={`node-stepper-item ${activeNode === 'all' ? 'is-active' : ''}`}
+              onClick={() => setActiveNode('all')}
+            >
+              <span className="node-stepper-bullet" style={{ background: 'var(--purple)' }}>⑂</span>
+              <span>Tutti i Nodi</span>
+              <span className="node-count-pill">{visibleTasks.length}</span>
+            </button>
+            {COLUMNS.map((col, idx) => {
+              const count = getColTasks(col.id).length
+              const isSelected = activeNode === col.id
+              return (
+                <button
+                  key={col.id}
+                  className={`node-stepper-item ${isSelected ? 'is-active' : ''}`}
+                  onClick={() => {
+                    setActiveNode(col.id)
+                    const el = document.getElementById(`node-station-${col.id}`)
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }}
+                >
+                  <span className="node-stepper-bullet" style={{ background: col.color }}>{idx + 1}</span>
+                  <span>{col.label.split(' / ')[0]}</span>
+                  <span className="node-count-pill">{count}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Workflow Nodi con Cavi di Connessione */}
+          <div className="node-flow-chain">
+            {COLUMNS.filter(c => activeNode === 'all' || activeNode === c.id).map((col, idx, arr) => {
+              const colTasks = getColTasks(col.id)
+              const colIndex = COLUMNS.findIndex(c => c.id === col.id)
+              const nextCol = colIndex < COLUMNS.length - 1 ? COLUMNS[colIndex + 1] : null
+              return (
+                <React.Fragment key={col.id}>
+                  <div
+                    id={`node-station-${col.id}`}
+                    className={`node-station ${activeNode === col.id ? 'is-focused' : ''}`}
+                    style={{ '--node-color': col.color, borderTop: `3px solid ${col.color}` }}
+                  >
+                    <div className="node-station-header">
+                      <div className="node-station-title" style={{ color: col.color }}>
+                        <Icon name={col.icon} size={18} />
+                        <span>Nodo {colIndex + 1}: {col.label}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span className="node-station-badge" style={{ color: col.color, background: `${col.color}15` }}>
+                          {colTasks.length} task
+                        </span>
+                        <button
+                          className="btn btn-primary btn-sm"
+                          style={{ padding: '3px 8px', fontSize: 11, borderRadius: 6, display: 'flex', alignItems: 'center', gap: 4 }}
+                          onClick={openNewTask}
+                          title="Aggiungi nuovo task in questa fase"
+                        >
+                          <Icon name="plus" size={11} /> Nuovo
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="node-task-list">
+                      {colTasks.length === 0 ? (
+                        <div style={{ padding: '16px 12px', textAlign: 'center', color: 'var(--text-3)', fontSize: 12, border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 'var(--radius-sm)' }}>
+                          Nessun task attivo in questo nodo
+                        </div>
+                      ) : (
+                        colTasks.map(task => {
+                          const assignedUser = getUserById(task.asignado)
+                          const due = dueInfo(task)
+                          const isRunning = task.estado === 'en_progreso' && task.timerStartedAt && !task.timerPaused
+                          return (
+                            <div
+                              key={task.id}
+                              className="node-task-card"
+                              onClick={() => openEditTask(task)}
+                            >
+                              {/* Header Card con Badge */}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, gap: 6, flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                  <span className={`badge badge-${task.prioridad}`} style={{ fontSize: 9.5, padding: '2px 8px', borderRadius: 99 }}>
+                                    {task.prioridad}
+                                  </span>
+                                  {task.cliente && (
+                                    <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-2)', background: 'rgba(255,255,255,0.06)', padding: '2px 7px', borderRadius: 6 }}>
+                                      {task.cliente}
+                                    </span>
+                                  )}
+                                </div>
+                                {due && (
+                                  <span style={{
+                                    fontSize: 9.5, fontWeight: 700, color: due.color,
+                                    background: due.bg, borderRadius: 99,
+                                    padding: '2px 8px', display: 'inline-flex', alignItems: 'center', gap: 3
+                                  }}>
+                                    {due.label}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Titolo e descrizione */}
+                              <div className="node-task-title">
+                                {task.tarea}
+                              </div>
+                              {task.descripcion && (
+                                <div className="node-task-desc">
+                                  {task.descripcion}
+                                </div>
+                              )}
+
+                              {/* Assegnatario e tempo */}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-3)' }}>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                                  {assignedUser?.photo ? (
+                                    <img src={assignedUser.photo} alt="" style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover' }} />
+                                  ) : (
+                                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: assignedUser?.color || 'var(--purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#fff' }}>
+                                      {(assignedUser?.name || '?')[0].toUpperCase()}
+                                    </div>
+                                  )}
+                                  <span style={{ color: 'var(--text-2)', fontWeight: 600 }}>{assignedUser?.name || 'Non assegnato'}</span>
+                                </div>
+
+                                <WorkedTime task={task} />
+                              </div>
+
+                              {/* Bottoni di Avanzamento / Retrocessione Diretta da Mobile */}
+                              <div className="node-task-actions" onClick={e => e.stopPropagation()}>
+                                {colIndex > 0 ? (
+                                  <button
+                                    className="node-shift-btn"
+                                    onClick={() => moveByStep(task, -1)}
+                                    title={`Sposta in ${COLUMNS[colIndex - 1].label}`}
+                                  >
+                                    ‹ {COLUMNS[colIndex - 1].label.split(' ')[1] || 'Indietro'}
+                                  </button>
+                                ) : <div />}
+
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                  {canMoveTask(task) && task.estado === 'en_progreso' && (
+                                    <button
+                                      className="btn btn-ghost btn-sm btn-icon"
+                                      style={{ width: 26, height: 26, padding: 0, color: isRunning ? 'var(--warning)' : 'var(--success)' }}
+                                      onClick={() => handlePauseResume(task)}
+                                      title={isRunning ? "Pausa timer" : "Riprendi timer"}
+                                    >
+                                      <Icon name={isRunning ? "pause" : "play"} size={13} />
+                                    </button>
+                                  )}
+                                  <button
+                                    className="btn btn-ghost btn-sm btn-icon"
+                                    style={{ width: 26, height: 26, padding: 0 }}
+                                    onClick={() => openEditTask(task)}
+                                    title="Modifica task"
+                                  >
+                                    <Icon name="edit" size={13} />
+                                  </button>
+                                </div>
+
+                                {colIndex < COLUMNS.length - 1 ? (
+                                  <button
+                                    className="node-shift-btn next"
+                                    onClick={() => moveByStep(task, 1)}
+                                    title={`Avanza in ${COLUMNS[colIndex + 1].label}`}
+                                  >
+                                    {COLUMNS[colIndex + 1].label.split(' ')[1] || 'Avanza'} ›
+                                  </button>
+                                ) : (
+                                  <span style={{ fontSize: 10.5, color: 'var(--success)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                                    <Icon name="check" size={12} /> Completato
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Cavo Connettore SVG tra i Nodi */}
+                  {idx < arr.length - 1 && activeNode === 'all' && (
+                    <div className="node-cable-connector" style={{ '--from-color': col.color, '--to-color': nextCol?.color || col.color }}>
+                      <div className="node-cable-line" />
+                      <div className="node-cable-pulse">↓</div>
+                    </div>
+                  )}
+                </React.Fragment>
+              )
+            })}
+          </div>
+        </div>
+      ) : viewMode === 'board' ? (
         <>
 
       {/* Quick Column Jump for Mobile */}

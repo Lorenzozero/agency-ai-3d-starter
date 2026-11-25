@@ -6,6 +6,7 @@ const PATHS = {
   // Navegación
   grid:      <><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,
   columns:   <><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="9.5" y="3" width="5" height="12" rx="1"/><rect x="16" y="3" width="5" height="15" rx="1"/></>,
+  flow:      <><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><path d="M6 9v12M9 6h6M18 9v6"/></>,
   checkSquare: <><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m9 12 2 2 4-5"/></>,
   users:     <><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/><circle cx="17.5" cy="7.5" r="3"/><path d="M22 21v-1.5a3.5 3.5 0 0 0-3-3.46"/></>,
   user:      <><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></>,

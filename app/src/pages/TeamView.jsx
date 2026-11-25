@@ -178,37 +178,37 @@ export default function TeamView() {
               onClick={() => setDetailItem({ type: 'user', data: member, stats: s, isOnline, todayHours: totalH, tokens })}
               title="Clicca per aprire i dettagli"
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   {member.photo ? (
-                    <img src={member.photo} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }} />
+                    <img src={member.photo} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover' }} />
                   ) : (
-                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: member.color || 'var(--purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11.5, fontWeight: 700, color: '#fff' }}>
+                    <div style={{ width: 38, height: 38, borderRadius: '50%', background: member.color || 'var(--purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#fff' }}>
                       {(member.name || '?')[0].toUpperCase()}
                     </div>
                   )}
                   <div
                     style={{
                       position: 'absolute', bottom: -1, right: -1,
-                      width: 7.5, height: 7.5, borderRadius: '50%',
+                      width: 9, height: 9, borderRadius: '50%',
                       background: isOnline ? 'var(--success)' : 'var(--text-3)',
-                      border: '1.5px solid var(--card)'
+                      border: '2px solid var(--card)'
                     }}
                   />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ color: '#f0f0ff', fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ color: '#f0f0ff', fontWeight: 800, fontSize: 13.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {member.name}
                   </div>
-                  <div style={{ fontSize: 10, color: 'var(--text-2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 1 }}>
                     {member.position || member.email}
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 5, fontSize: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, fontSize: 11 }}>
                 {s.activeTask ? (
-                  <span style={{ color: '#a78bfa', background: 'var(--purple-light)', padding: '1px 5px', borderRadius: 4, fontWeight: 700 }}>
+                  <span style={{ color: '#a78bfa', background: 'var(--purple-light)', padding: '2px 7px', borderRadius: 5, fontWeight: 700 }}>
                     ⚡ In corso
                   </span>
                 ) : (
@@ -216,18 +216,18 @@ export default function TeamView() {
                     {s.completadas > 0 ? `✅ ${s.completadas}` : (isOnline ? 'Online' : 'Offline')}
                   </span>
                 )}
-                <span style={{ color: 'var(--text-3)', fontSize: 9.5 }}>Dettagli ›</span>
+                <span style={{ color: 'var(--text-3)', fontSize: 10.5 }}>Dettagli ›</span>
               </div>
 
               {/* Barra progressiva consumo token reale */}
-              <div style={{ marginTop: 5 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 9.5, marginBottom: 2 }}>
+              <div style={{ marginTop: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 10.5, marginBottom: 3 }}>
                   <span style={{ color: 'var(--text-3)' }}>Token</span>
                   <span style={{ fontFamily: 'Space Mono', color: '#a78bfa', fontWeight: 700 }}>
                     {fmtTokens(tokens.used)}
                   </span>
                 </div>
-                <div style={{ width: '100%', height: 3.5, background: 'rgba(255,255,255,0.08)', borderRadius: 99, overflow: 'hidden' }}>
+                <div style={{ width: '100%', height: 4.5, background: 'rgba(255,255,255,0.08)', borderRadius: 99, overflow: 'hidden' }}>
                   <div style={{
                     width: `${tokens.pct}%`, height: '100%', borderRadius: 99,
                     background: 'linear-gradient(90deg, #7c3aed, #a78bfa)'
@@ -252,31 +252,31 @@ export default function TeamView() {
               onClick={() => setDetailItem({ type: 'agent', data: a, stats: s, isOn, tokens })}
               title="Clicca per aprire i dettagli"
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
-                  <AgentAvatar agent={a} size={28} />
+                  <AgentAvatar agent={a} size={38} />
                   <div
                     style={{
                       position: 'absolute', bottom: -1, right: -1,
-                      width: 7.5, height: 7.5, borderRadius: '50%',
+                      width: 9, height: 9, borderRadius: '50%',
                       background: isOn ? 'var(--success)' : 'var(--text-3)',
-                      border: '1.5px solid var(--card)'
+                      border: '2px solid var(--card)'
                     }}
                   />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ color: '#f0f0ff', fontWeight: 700, fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ color: '#f0f0ff', fontWeight: 800, fontSize: 13.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {a.name}
                   </div>
-                  <div style={{ fontSize: 10, color: 'var(--text-2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 1 }}>
                     {a.role}
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 5, fontSize: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, fontSize: 11 }}>
                 {s.activeTask ? (
-                  <span style={{ color: '#a78bfa', background: 'var(--purple-light)', padding: '1px 5px', borderRadius: 4, fontWeight: 700 }}>
+                  <span style={{ color: '#a78bfa', background: 'var(--purple-light)', padding: '2px 7px', borderRadius: 5, fontWeight: 700 }}>
                     ⚡ Al lavoro
                   </span>
                 ) : (
@@ -284,18 +284,18 @@ export default function TeamView() {
                     {tokens.actions > 0 ? `⚡ ${tokens.actions} az.` : (s.completadas > 0 ? `✅ ${s.completadas}` : (isOn ? 'Pronto' : 'In riserva'))}
                   </span>
                 )}
-                <span style={{ color: 'var(--text-3)', fontSize: 9.5 }}>Dettagli ›</span>
+                <span style={{ color: 'var(--text-3)', fontSize: 10.5 }}>Dettagli ›</span>
               </div>
 
               {/* Barra progressiva consumo token reale */}
-              <div style={{ marginTop: 5 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 9.5, marginBottom: 2 }}>
+              <div style={{ marginTop: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 10.5, marginBottom: 3 }}>
                   <span style={{ color: 'var(--text-3)' }}>Token</span>
                   <span style={{ fontFamily: 'Space Mono', color: tokens.sharePct > 40 ? '#f59e0b' : '#a78bfa', fontWeight: 700 }}>
                     {fmtTokens(tokens.used)}{tokens.sharePct > 0 ? ` (${tokens.sharePct}%)` : ''}
                   </span>
                 </div>
-                <div style={{ width: '100%', height: 3.5, background: 'rgba(255,255,255,0.08)', borderRadius: 99, overflow: 'hidden' }}>
+                <div style={{ width: '100%', height: 4.5, background: 'rgba(255,255,255,0.08)', borderRadius: 99, overflow: 'hidden' }}>
                   <div style={{
                     width: `${tokens.pct}%`, height: '100%', borderRadius: 99,
                     background: tokens.sharePct > 40 ? 'linear-gradient(90deg, #a78bfa, #f59e0b)' : 'linear-gradient(90deg, #7c3aed, #a78bfa)'
