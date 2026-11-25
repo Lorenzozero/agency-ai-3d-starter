@@ -218,8 +218,13 @@ def stock_videos(query: str, transport=None, limit: int = 8) -> dict:
 
 def check_funnel(spec: dict) -> list[str]:
     """Controlla lo scheletro dello spec. Ritorna l'elenco dei problemi (vuoto = ok)."""
-    secs = spec.get("sections") or []
-    roles = [str((s or {}).get("role", "")).strip().lower() for s in secs]
+    if not isinstance(spec, dict):
+        return ["lo spec deve essere un dizionario JSON valido"]
+    secs_raw = spec.get("sections") or []
+    if not isinstance(secs_raw, list):
+        return ["il campo 'sections' deve essere una lista"]
+    secs = [s if isinstance(s, dict) else {"type": str(s), "role": ""} for s in secs_raw]
+    roles = [str(s.get("role") or "").strip().lower() for s in secs]
     errs = []
     if len(str((spec.get("brand") or {}).get("name", "")).strip()) < 2:
         errs.append("manca il nome della marca (brand.name): e' il logo scritto in alto e il titolo della pagina")
@@ -233,14 +238,15 @@ def check_funnel(spec: dict) -> list[str]:
         if roles.count(r) > 1:
             errs.append(f"il ruolo '{r}' compare piu' volte")
     for s, r in zip(secs, roles):
-        if r in ROLE_TYPES and s.get("type") not in ROLE_TYPES[r]:
-            errs.append(f"il ruolo '{r}' richiede una sezione di tipo {' o '.join(ROLE_TYPES[r])}, non '{s.get('type')}'")
+        stype = str(s.get("type") or "").strip()
+        if r in ROLE_TYPES and stype not in ROLE_TYPES[r]:
+            errs.append(f"il ruolo '{r}' richiede una sezione di tipo {' o '.join(ROLE_TYPES[r])}, non '{stype}'")
         if r and r not in SPINE and r != "extra":
             errs.append(f"ruolo sconosciuto: '{r}'")
         if not r:
-            errs.append(f"sezione '{s.get('type')}' senza role")
-        if r == "extra" and len(str(s.get("extra_why", "")).strip()) < 10:
-            errs.append(f"la sezione extra '{s.get('type')}' non spiega a quale servizio o prodotto serve (extra_why)")
+            errs.append(f"sezione '{stype}' senza role")
+        if r == "extra" and len(str(s.get("extra_why") or "").strip()) < 10:
+            errs.append(f"la sezione extra '{stype}' non spiega a quale servizio o prodotto serve (extra_why)")
     if roles.count("extra") > MAX_EXTRA:
         errs.append(f"troppe sezioni extra (max {MAX_EXTRA})")
     if "extra" in roles:
