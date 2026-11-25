@@ -5,7 +5,7 @@ model: sonnet
 effort: medium
 tools: []
 mcp: [web_audit]
-skills: [audit-legale-compliance, memoria-agente]
+skills: [controllo-siti, memoria-agente]
 memory:
   private: true
   shared: read
