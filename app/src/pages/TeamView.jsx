@@ -64,7 +64,7 @@ function LiveTimer({ timerStartedAt, totalTimeSeconds }) {
 
 export default function TeamView() {
   const { users, agents, tasks, isAdmin, isSuperAdmin, openEditTask, user, showToast } = useApp()
-  const [filter, setFilter] = useState('all') // 'all', 'agents', 'users', 'active', 'reserve'
+  const [filter, setFilter] = useState('agents') // 'agents', 'users'
   const [editing, setEditing] = useState(null) // null | 'new' | agent
   const [detailItem, setDetailItem] = useState(null) // null | { type, data, stats, ... }
 
@@ -119,8 +119,8 @@ export default function TeamView() {
   const reserveAgentsCount = agents.filter(a => a.active === false).length
 
   // Filtro
-  const showUsers = filter === 'all' || filter === 'users'
-  const showAgents = filter === 'all' || filter === 'agents' || filter === 'active' || filter === 'reserve'
+  const showUsers = filter === 'users'
+  const showAgents = filter === 'agents' || filter === 'active' || filter === 'reserve'
 
   const filteredAgents = agents
     .slice()
@@ -144,12 +144,6 @@ export default function TeamView() {
       {/* Action Bar Unificata */}
       <div className="page-header" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="page-actions btn-row" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' }}>
-          <button
-            className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setFilter('all')}
-          >
-            Tutti ({totalCount})
-          </button>
           <button
             className={`btn btn-sm ${filter === 'agents' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setFilter('agents')}

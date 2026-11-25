@@ -58,14 +58,31 @@
 
 ---
 
-## 🔄 3. Come Funziona un Ordine? (100% Controllato da Telegram)
+## 🔄 3. Come Funziona un Ordine? (Supergruppo Telegram a Topic & Tavola Rotonda)
 
 ```mermaid
-flowchart LR
-    S1["1️⃣ ORDINI SU TELEGRAM\nScrivi al Bot:\n'Rifai il sito X' / 'Cosa scade?'"] --> S2["2️⃣ IL COO SMISTA\nDelega agli specialisti;\nla Console 3D li mostra al lavoro"]
-    S2 --> S3["3️⃣ HOOK PERMESSI\nLetture = subito\nModifiche/Deploy = bloccati su SQLite"]
-    S3 --> S4["4️⃣ CONFERMI SU TELEGRAM\nTi arriva il messaggio coi bottoni\n[✅ Conferma] / [❌ Annulla]"]
+flowchart TD
+    S1["1️⃣ INTAKE IN #TRIAGE\nScrivi nel canale Triage o avvia /build <brief>"] --> S2["2️⃣ TAVOLA ROTONDA AUTONOMA\nGli 8 uffici dibattono in parallelo nei rispettivi Topic:\nOSINT · Design · Copywrite · Sviluppo · Sicurezza"]
+    S2 --> S3["3️⃣ DELIBERA & FABBRICA SITI V10\nDirezione Generale sintetizza ed emette semaforo verde;\nCompilazione Tailwind + 3D + QA Playwright mobile (0 errori)"]
+    S3 --> S4["4️⃣ RESOCONTO ESECUTIVO IN #GENERAL\nDirezione posta il riepilogo nel canale principale con pulsanti:\n[ 🌐 Apri Sito Live 🚀 ] · [ 📁 Repository GitHub ]"]
 ```
+
+### Canali Tematici del Supergruppo (1 Ufficio per Topic)
+
+| Canale Telegram | Ruolo Presidiato | Specializzazione Operativa |
+| :--- | :--- | :--- |
+| ⚡ **`Triage`** | Hermes COO & Intake | Ricezione brief, smistamento prioritario e orchestratore della tavola rotonda. |
+| 👑 **`Direzione`** | Hermes CEO & CTO | Governance strategica, delibere unanimi e rilascio semaforo verde alla produzione. |
+| 💎 **`Design`** | Art Director & 3D | Direzione visiva Dark Luxury, palette 60-30-10 (#090A0F) e asset 3D Spline/Three.js <1.2MB. |
+| 🖨️ **`Copywrite`** | Lead Copywriter | Copywriting scientifico ad alta conversione, framework PAS e 3 USP differenzianti. |
+| 🏠 **`Sviluppo`** | Lead Web Engineer | Architettura HTML5/Tailwind semantica, scroll cinetico e QA Playwright headless su 390px. |
+| 🔍 **`OSINT`** | Market Scout & Analyst | Scansione competitor da Google Maps, estrazione asset e Sentiment Gap Analysis. |
+| 👮 **`Sicurezza`** | Sentinella SOC & SRE | Hardening CSP ferreo (zero dipendenze CDN vulnerabili), LCP sub-second (<0.9s), SLA 99.9%. |
+| 🗳️ **`Consegne`** | Delivery Lead | Tracciamento pipeline di deploy, test automatici e rilascio credenziali. |
+| `#` **`General`** | Canale Principale | **Resoconto Esecutivo Finale** con pulsanti inline Telegram (`Apri Sito Live` / `Repo GitHub`). |
+
+> 📱 **Formattazione Mobile-Safe Automatica (`hlab/topics.py`):**  
+> Include un sanitizer runtime che converte al volo tabelle Markdown in comode schede ad elenco puntato, ripulisce la sintassi di intestazione, formatta i blockquote e gestisce il flood-control di Telegram con backoff intelligente.
 
 ---
 
@@ -169,7 +186,7 @@ agency-ai-3d-starter/
 ├── agents/            # 15 agenti IA in Markdown (coo, account-crm, commerciale, deployer, sentinella...)
 ├── .claude/skills/    # 20 skills operative (audit, copy, costruzione siti, preventivi, salute sistema)
 ├── app/               # Web Console React + Three.js di sola lettura + Shim SQLite (src/shim/*)
-├── hlab/              # Backend Python (api, api_sync, docstore, events, policy, router, sitefactory, tools)
+├── hlab/              # Backend Python (api, events, policy, router, sitefactory, topics, tools)
 ├── deploy/            # Servizi systemd, timer e script SQL ruolo read-only per CRM Postgres
 ├── models.yaml        # Configurazione pool modelli gratuiti e fallback del router
 └── tests/             # 28 moduli di test automatici (esegui con: pytest -q)

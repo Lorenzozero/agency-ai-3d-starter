@@ -4,7 +4,7 @@ description: Copywriter professionista dei siti. Scrive e rifinisce i testi di o
 model: sonnet
 effort: medium
 tools: []
-mcp: [crm_read, projects_read, web_audit, site_copy]
+mcp: [web_audit, site_copy]
 skills: [copywriting-professionale, memoria-agente]
 memory:
   private: true

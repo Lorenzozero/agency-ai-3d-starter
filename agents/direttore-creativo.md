@@ -4,7 +4,7 @@ description: Direttore creativo dei siti. Legge il cliente e progetta lo spec de
 model: sonnet
 effort: medium
 tools: []
-mcp: [crm_read, projects_read, web_audit, site_design]
+mcp: [web_audit, site_design]
 skills: [direzione-creativa, memoria-agente]
 memory:
   private: true

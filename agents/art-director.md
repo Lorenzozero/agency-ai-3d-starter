@@ -4,7 +4,7 @@ description: Art director, sceneggiatore e regista dei siti. Scrive la bibbia vi
 model: sonnet
 effort: medium
 tools: []
-mcp: [crm_read, projects_read, web_audit, site_art]
+mcp: [web_audit, site_art]
 skills: [regia-cinematografica, memoria-agente]
 memory:
   private: true
