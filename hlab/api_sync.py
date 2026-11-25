@@ -89,7 +89,8 @@ def agents_docs(ev: Events | None = None) -> dict[str, dict]:
     tot_tokens = sum(s.get("tokensUsed", 0) for s in stats.values()) or 0
     for i, (name, spec) in enumerate(sorted(specs.items(), key=lambda kv: (kv[0] != "coo", kv[0]))):
         st = stats.get(name, {})
-        out[name] = {"name": name.replace("-", " ").title().replace("Coo", "COO").replace("Crm", "CRM"), "rol": name, "role": spec.description.split(".")[0][:60],
+        dname = "Developer" if name == "costruttore-siti" else name.replace("-", " ").title().replace("Coo", "COO").replace("Crm", "CRM")
+        out[name] = {"name": dname, "rol": name, "role": spec.description.split(".")[0][:60],
                      "bio": spec.description, "mission": (spec.prompt or "")[:500], "photo": "", "look": {}, "active": True, "order": i,
                      "breakUntil": None, "breakType": None, **({"kind": "coordinador"} if name == "coo" else {}),
                      "specHash": hashlib.sha1(f"{spec.description}|{spec.prompt}".encode()).hexdigest()[:10],

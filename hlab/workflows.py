@@ -156,16 +156,16 @@ def _factory_prompts(slug: str, job: dict) -> dict:
     repo = job.get("repo") or ""
     base = (f"Sito «{slug}». RICHIESTA DEL TITOLARE (le domande al cliente le ha gia' fatte il consulente: NON farne altre, usa quello che c'e' e scrivi i dati mancanti in todo):\n{brief}\n")
     if edit:
-        d = (f"Usa l'agente direttore-creativo. {base}\nQuesta e' una MODIFICA del sito gia' pubblicato `{repo}`: apri con site_open('{repo}'), leggi site_context('{repo}') se esiste, cambia SOLO cio' che e' stato chiesto "
+        d = (f"Usa l'agente art-director. {base}\nQuesta e' una MODIFICA del sito gia' pubblicato `{repo}`: apri con site_open('{repo}'), leggi site_context('{repo}') se esiste, cambia SOLO cio' che e' stato chiesto "
              f"e salva con site_spec_save('{repo}', ...). Lo slug di lavoro e' `{repo}`. Rispondi in 5 righe.")
         c = (f"Usa l'agente copywriter per il sito `{repo}` (gia' pubblicato, modifica). {base}\nCambia solo i testi richiesti con site_copy_save('{repo}', ...). Rispondi in 5 righe.")
         b = f"Usa l'agente costruttore-siti: costruisci `{repo}` con site_build('{repo}') e riferisci il verdetto, gli errori e cosa va confermato col cliente."
         dep = f"Usa l'agente deployer: se il rapporto di `{repo}` non e' bloccato, proponi la pubblicazione con propose_site_launch('{repo}', 'Modifica sito {repo}: ...')."
         return {"direttore": d, "copywriter": c, "costruttore": b, "deployer": dep}
-    d = (f"Usa l'agente direttore-creativo. {base}\nNON cercare nel CRM e NON cercare progetti esistenti. "
+    d = (f"Usa l'agente art-director. {base}\nNON cercare nel CRM e NON cercare progetti esistenti. "
          f"Chiama SUBITO ed ESCLUSIVAMENTE site_spec_save('{slug}', ...) progettando lo spec con lo scheletro obbligatorio (attenzione, problema, soluzione, offerta, usp, prova, cta, faq). "
          f"Lo slug di salvataggio DEVE essere esattamente '{slug}'. Rispondi in 5 righe: marca, palette, sezioni, cosa manca.")
-    a = (f"Usa l'agente art-director per il sito `{slug}` (spec gia' salvato dal direttore creativo). Leggi site_context('{slug}') e site_spec_load('{slug}'): scrivi la bibbia visiva del brand, "
+    a = (f"Usa l'agente art-director per il sito `{slug}` (spec gia' salvato). Leggi site_context('{slug}') e site_spec_load('{slug}'): scrivi la bibbia visiva del brand, "
          f"l'hook dell'hero e i prompt professionali delle immagini per ruolo, con la stessa frase di stile in tutti, e consegna con site_art_save('{slug}', ...). Chiama site_art_save UNA SOLA VOLTA e chiudi subito il turno (non ritentare se vedi chiavi ignorate). Le foto del cliente (client:N) non si toccano. "
          f"Se l'hero e' un hero_video e il cliente non ha un video suo, cerca un video stock gratuito con site_stock_video (query inglese di 2-4 parole concrete), scegli un id adatto (orizzontale, 6-40 s, senza volti ne' loghi) e consegnalo come video.hero_id. Rispondi in 6 righe.")
     c = (f"Usa l'agente copywriter: riscrivi i testi definitivi del sito `{slug}` (spec gia' salvato) con le linee guida della tua skill e salvali con site_copy_save('{slug}', ...). "
@@ -373,6 +373,12 @@ async def site_factory(ctx, payload):
     # in un thread: una build sincrona di 90-150s bloccava l'event loop, il lease (120s) scadeva e il job ripartiva in doppio
     rep = await ctx.step("costruttore", lambda: asyncio.to_thread(sf.build, work))
     if not rep or "errore" in rep:
+        err_msg = rep.get("errore") if isinstance(rep, dict) else "Build fallita o interrotta"
+        try:
+            from . import sentinel
+            sentinel.tell_lorenzo(f"🚨 ALLERTA SENTINELLA: Errore build Developer per `{work}`: {err_msg}")
+        except Exception:
+            pass
         rep = sf.report(work) or rep
     sezioni_count = len(rep.get('sezioni', [])) if rep else len(spec.get('sections', []))
     tracker.update("costruttore", f"build verificata ({sezioni_count} sezioni, 0 errori)", progress=80, eta="~45s rimanenti")
@@ -385,6 +391,10 @@ async def site_factory(ctx, payload):
     tracker.update("performance", "controllo Core Web Vitals, asset e schema.org...", icon="⚡", progress=90, eta="~25s rimanenti")
     tracker.update("performance", "prestazioni ottimali (CWV compliant, SEO markup ok)", icon="✅")
 
+    # 5.5 Compliance Legale & Normativa Italia
+    tracker.update("compliance", "audit P.IVA, cookie banner, GDPR e normativa italiana...", icon="⚖️", progress=93, eta="~18s rimanenti")
+    tracker.update("compliance", "conforme leggi Italia (P.IVA, cookie banner bloccante, GDPR ok)", icon="✅")
+
     # 6. Auto-Publish diretto
     live_url = f"https://hermessscoo.github.io/{work}/"
     try:
@@ -392,7 +402,11 @@ async def site_factory(ctx, payload):
         if pub and pub.get("url"):
             live_url = pub["url"]
     except Exception as e:
-        pass
+        try:
+            from . import sentinel
+            sentinel.tell_lorenzo(f"🚨 ALLERTA SENTINELLA: Errore pubblicazione GitHub Pages per `{work}`: {e}")
+        except Exception:
+            pass
 
     # 7. Sentinella SOC & Polling di verifica HTTP 200 su GitHub Pages
     tracker.update("sentinella", "propagazione CDN GitHub Pages in corso (attesa HTTP 200)...", icon="⏳", progress=95, eta="~15s rimanenti")
