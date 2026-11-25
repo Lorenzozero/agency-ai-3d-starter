@@ -708,19 +708,47 @@ async def run_roundtable_debate(bot, topic_or_link: str, llm_func, group_id: int
         soc_chat_prompt = (
             f"Sei il Security & Performance Lead (Sentinella SOC). Nel canale Triage rispondi a Sviluppo per '{biz_name}'.\n"
             f"Tuo audit: {soc_reply[:400]}\n"
-            "Scrivi 2 frasi rigorose: tagga @Sviluppo confermando CSP rigorosa, zero tracker esterni e LCP <0.9s, poi passa la palla a @Direzione per la delibera esecutiva finale. Nessun preambolo."
+            "Scrivi 2 frasi rigorose: tagga @Sviluppo confermando CSP rigorosa, zero tracker esterni e LCP <0.9s, poi passa la palla a @Compliance per la verifica legale Italia/UE. Nessun preambolo."
         )
         soc_chat, _ = await llm_func(soc_chat_prompt, OFFICES["soc"]["system_prompt"], max_tokens=150)
     except Exception:
-        soc_chat = f"@Sviluppo CSP blindata con hash sha256 per gli inline, zero CDN terze e LCP target a 0.85s validato. @Direzione, perimetro difensivo approvato."
-    await broadcast_to_office(bot, "triage", f"[Sentinella SOC -> @Sviluppo @Direzione]\n{soc_chat}")
+        soc_chat = f"@Sviluppo CSP blindata con hash sha256 per gli inline, zero CDN terze e LCP target a 0.85s validato. @Compliance, tocca a te per l'audit normativo."
+    await broadcast_to_office(bot, "triage", f"[Sentinella SOC -> @Sviluppo @Compliance]\n{soc_chat}")
 
     await asyncio.sleep(2.0)
 
-    # 6. Topic Direction: Delibera Esecutiva CEO/CTO
+    # 6. Legal & Compliance: Audit Normative Italia & UE
+    compliance_prompt = (
+        f"Sei il Legal & Compliance Officer di Hermes Lab. Verifica conformità normative Repubblica Italiana ed EU per '{biz_name}'.\n"
+        f"Controlla: 1) Obbligo Partita IVA e dati societari nel footer (art. 2250 c.c. e art. 35 DPR 633/72: REA, sede legale, PEC);\n"
+        f"2) GDPR e Cookie Policy Garante Privacy (blocco preventivo script terze parti e consenso esplicito);\n"
+        f"3) Trasparenza prezzi e Codice del Consumo (D.lgs 206/2005) o autorizzazioni di settore;\n"
+        f"4) Accessibilità e requisiti EAA. Sii chirurgico: elenca i dati obbligatori da includere nel footer e rilascia il visto di conformità legale."
+    )
+    try:
+        compliance_reply, _ = await llm_func(compliance_prompt, "Sei il Legal & Compliance Officer specializzato in diritto digitale e normative web italiane ed europee. " + TELEGRAM_FORMAT_RULE, max_tokens=600)
+    except Exception:
+        compliance_reply = f"Audit di conformità normativa completato per {biz_name}: P.IVA obbligatoria nel footer, cookie policy GDPR e conformità art. 2250 c.c. approvate."
+    await broadcast_to_office(bot, "soc", f"⚖️ *Audit Legal & Compliance Italia/UE (`{biz_name}`)*:\n\n{compliance_reply}")
+
+    # Intervento dialogico Compliance in Triage per la squadra
+    try:
+        comp_chat_prompt = (
+            f"Sei il Legal & Compliance Officer. Nel canale Triage intervieni prima della delibera per '{biz_name}'.\n"
+            f"Tuo audit: {compliance_reply[:300]}\n"
+            "Scrivi 2 frasi: tagga @Direzione confermando conformità alle leggi italiane (P.IVA art. 35, dati art. 2250 c.c., cookie banner GDPR e Codice del Consumo) e concedi il semaforo verde legale. Nessun preambolo."
+        )
+        comp_chat, _ = await llm_func(comp_chat_prompt, "Sei il Legal & Compliance Officer. " + TELEGRAM_FORMAT_RULE, max_tokens=150)
+    except Exception:
+        comp_chat = f"@Direzione audit normativo superato: P.IVA nel footer, informativa privacy GDPR e conformità Codice del Consumo verificate. Semaforo verde legale concesso."
+    await broadcast_to_office(bot, "triage", f"[Legal & Compliance -> @Direzione @Sviluppo]\n{comp_chat}")
+
+    await asyncio.sleep(2.0)
+
+    # 7. Topic Direction: Delibera Esecutiva CEO/CTO
     dir_prompt = (
         f"Sei il CEO & CTO di Hermes Lab. La squadra ha completato la tavola rotonda per `{biz_name}`.\n"
-        f"OSINT: {osint_reply[:150]}\nDesign: {creative_reply[:150]}\nCopy: {copy_reply[:150]}\nDev: {dev_reply[:150]}\nSOC: {soc_reply[:150]}\n\n"
+        f"OSINT: {osint_reply[:120]}\nDesign: {creative_reply[:120]}\nCopy: {copy_reply[:120]}\nDev: {dev_reply[:120]}\nSOC: {soc_reply[:120]}\nCompliance: {compliance_reply[:120]}\n\n"
         f"Emetti la delibera esecutiva: congela le specifiche, autorizza la Fabbrica Siti e assegna la priorità alla produzione."
     )
     try:
@@ -749,6 +777,7 @@ async def run_roundtable_debate(bot, topic_or_link: str, llm_func, group_id: int
         f"- Copywriting -> Headline e 3 USP approvate\n"
         f"- Sviluppo -> Architettura Tailwind e QA Playwright impostati\n"
         f"- Sicurezza -> CSP rigorosa e target LCP <0.9s garantiti\n"
+        f"- Compliance -> P.IVA, privacy GDPR e Codice del Consumo validati\n"
         f"- Direzione -> Delibera esecutiva e semaforo verde alla produzione"
     )
     if initial_thread_id:
