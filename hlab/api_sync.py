@@ -132,7 +132,7 @@ def live_sync_once(store: Store, ev: Events | None = None, now: float | None = N
                 slug = payload.get("slug", "sito")
                 factory_team = [
                     ("coo", "Orchestrazione pipeline fabbrica"),
-                    ("direttore-creativo", "Architettura e layout sezioni"),
+                    ("compliance", "Audit conformità legale e normative Italia/UE"),
                     ("art-director", "Bibbia visiva e moodboard"),
                     ("copywriter", "Copywriting persuasivo e testi sezioni"),
                     ("costruttore-siti", "Assemblaggio e build componenti"),
